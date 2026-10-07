@@ -196,6 +196,26 @@ h2{
 }
 .map-hint b{color:var(--amarelo);}
 
+/* ---------------- Painel do Brasil (no mapa) ---------------- */
+.painel{
+  position:absolute;top:10px;left:10px;z-index:3;pointer-events:none;
+  width:min(40%,266px);
+  background:rgba(21,22,26,.82);border:2px solid rgba(255,255,255,.25);
+  border-radius:14px;padding:9px 10px;backdrop-filter:blur(3px);
+  box-shadow:0 6px 20px rgba(0,0,0,.4);
+}
+.pn-title{font-family:'Baloo 2',sans-serif;font-weight:800;color:#fff;
+  font-size:clamp(11px,2.3vw,15px);margin-bottom:6px;letter-spacing:.3px;}
+.pn-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid rgba(255,255,255,.12);}
+.pn-ico{font-size:clamp(13px,2.6vw,17px);flex:0 0 auto;}
+.pn-nome{flex:1;color:#e9e9ef;font-size:clamp(10px,2.1vw,12.5px);line-height:1.15;}
+.pn-nome small{display:block;color:#9aa0ad;font-size:.82em;}
+.pn-val{flex:0 0 auto;text-align:right;color:#cfd3db;font-size:clamp(10px,2.1vw,12.5px);font-weight:600;white-space:nowrap;}
+.pn-antes{color:#e88;}
+.pn-depois{color:#49d67e;}
+.pn-ok .pn-val{color:#49d67e;}
+@media (max-width:560px){ .painel{width:44%;top:6px;left:6px;padding:7px 8px;} }
+
 /* ---------------- Missão ---------------- */
 .missao-badge{
   display:inline-block;background:var(--amarelo);color:var(--preto);

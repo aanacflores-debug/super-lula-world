@@ -1,15 +1,19 @@
 /* ============================================================================
  * SUPER LULA WORLD — dados do jogo (JOGO EDUCATIVO)
  *
- * ESTRUTURA NARRATIVA
+ * NARRATIVA
  *  - INTRO: a história do Lula (do sertão à presidência).
- *  - No COMEÇO de cada mapa, um card no topo traz um trecho da história (era).
- *  - Os blocos '?' explicam as POLÍTICAS daquele mapa (você as conquista).
- *  - Ao fim do mapa: recap do que foi conquistado + o que melhorou no Brasil.
- *  - Chefão de cada fase = um grande PROBLEMA; no final, a ameaça estrangeira.
+ *  - Card de história no topo ao iniciar cada mapa (linha do tempo).
+ *  - Blocos '?' explicam as POLÍTICAS daquele mapa (você as conquista).
+ *  - Mapas 1–3: conquistas históricas que mudaram o país.
+ *  - Mapa 4: o 2º TURNO das eleições — propostas atuais (fim da escala 6x1),
+ *    proteção do dinheiro do povo (ação contra a fraude do Banco Master) e a
+ *    defesa da soberania e da democracia contra a ameaça estrangeira.
+ *  - Painel do Brasil (no mapa): indicadores reais que melhoram a cada fase.
  *
- * Vilões = "políticos do atraso" (caricaturas genéricas). O chefão final é uma
- * caricatura satírica (estilo charge) da ameaça estrangeira à soberania.
+ * Vilões = "políticos do atraso" (caricaturas genéricas). Chefão final = sátira
+ * política (estilo charge) da ameaça estrangeira à soberania. Conteúdo factual;
+ * sem repetir acusações não provadas contra pessoas específicas.
  * ==========================================================================*/
 
 /* ------------------------------- HISTÓRIA (intro) ----------------------- */
@@ -27,10 +31,10 @@ const HISTORIA = [
     texto: "Líder dos metalúrgicos do ABC, comandou grandes greves e ajudou a fundar a CUT e o Partido dos Trabalhadores.",
     art: "sindicato" },
   { titulo: "O presidente",
-    texto: "Depois de concorrer três vezes, foi eleito presidente em 2002 e começou a reconstruir o país.",
+    texto: "Eleito em 2002, tirou o Brasil do Mapa da Fome e, de volta em 2023, voltou a reconstruir o país.",
     art: "presidente" },
   { titulo: "Sua missão",
-    texto: "Atravesse o Brasil, conquiste as políticas que mudaram vidas e melhore as áreas do país. Vamos juntos!",
+    texto: "Atravesse o Brasil, conquiste as políticas que mudaram vidas e, no 2º turno, defenda a democracia. Vamos juntos!",
     art: "vamos" }
 ];
 
@@ -62,7 +66,10 @@ const CONQUISTAS = {
       sabia: "Atende tratamentos como pressão alta, diabetes e asma." },
     { nome: "Mais Médicos", emoji: "🩺",
       texto: "Leva médicos a cidades do interior e periferias que não conseguiam atrair profissionais.",
-      sabia: "Milhões passaram a ter atendimento perto de casa." }
+      sabia: "Milhões passaram a ter atendimento perto de casa." },
+    { nome: "Luz para Todos", emoji: "💡",
+      texto: "Levou energia elétrica a milhões de pessoas no campo e em regiões isoladas do Brasil.",
+      sabia: "Luz em casa é estudo à noite, geladeira e dignidade." }
   ],
   desigualdade: [
     { nome: "Salário mínimo acima da inflação", emoji: "💪",
@@ -71,39 +78,51 @@ const CONQUISTAS = {
     { nome: "Minha Casa, Minha Vida", emoji: "🏠",
       texto: "Financia e constrói moradias para famílias conquistarem a casa própria.",
       sabia: "Reduz o aluguel pesando no orçamento e gera muitos empregos." },
-    { nome: "Valorização do trabalho", emoji: "🗓️",
-      texto: "Defesa de direitos e melhores condições, como o debate sobre o fim da escala 6x1.",
-      sabia: "Trabalho digno é descanso, saúde e tempo com a família." }
-  ],
-  democracia: [
     { nome: "ProUni e novas universidades", emoji: "🎓",
       texto: "Bolsas no ensino superior e a criação de universidades e institutos federais pelo país.",
-      sabia: "Filhos de trabalhadores viraram os primeiros da família na faculdade." },
-    { nome: "Luz para Todos", emoji: "💡",
-      texto: "Levou energia elétrica a milhões de pessoas no campo e em regiões isoladas.",
-      sabia: "Luz em casa é estudo à noite, geladeira e dignidade." },
-    { nome: "Soberania e Democracia", emoji: "🗳️",
-      texto: "Defesa do Brasil, das instituições e do direito do povo de escolher seu futuro — contra a desinformação e a ingerência estrangeira.",
+      sabia: "Filhos de trabalhadores viraram os primeiros da família na faculdade." }
+  ],
+  democracia: [
+    { nome: "Fim da escala 6x1", emoji: "🗓️",
+      texto: "Proposta para acabar com a escala 6x1: mais descanso e menos adoecimento. Aprovada na Câmara, segue no Senado.",
+      sabia: "O texto reduz a jornada para 40h semanais e muda para 5x2." },
+    { nome: "O Brasil não se vende", emoji: "🛡️",
+      texto: "Nossas riquezas — minérios, terras raras, o Pix — são do povo brasileiro, não de interesses estrangeiros.",
+      sabia: "Defender a soberania é não entregar o que é nosso." },
+    { nome: "Dinheiro do povo protegido", emoji: "🏦",
+      texto: "O Banco Central liquidou a fraude bilionária do Banco Master (2025), protegendo poupadores e o sistema financeiro.",
+      sabia: "Fiscalização forte evita que golpes financeiros atinjam as famílias." },
+    { nome: "Democracia defendida", emoji: "🗳️",
+      texto: "Defesa das instituições e do direito do povo de escolher seu futuro — contra a fake news e a ingerência estrangeira.",
       sabia: "Democracia é o povo decidindo — e é preciso defendê-la todo dia." }
   ]
 };
 
-/* ------------------------------- CHEFÕES --------------------------------
- * 'kind' muda o desenho do chefão: 'blob' = criatura (problema),
- * 'tycoon' = caricatura satírica da ameaça estrangeira (estilo charge).  */
+/* ------------------------------- CHEFÕES -------------------------------- */
 const CHEFES = {
   fome:         { nome: "A FOME",               emoji: "🍽️", cor: "#6b4a2a", hp: 3, kind: "blob" },
   desmonte:     { nome: "O DESMONTE",           emoji: "🏚️", cor: "#5a6472", hp: 3, kind: "blob" },
   desigualdade: { nome: "A DESIGUALDADE",       emoji: "⚖️", cor: "#7a5a86", hp: 4, kind: "blob" },
-  democracia:   { nome: "O MAGNATA ESTRANGEIRO", emoji: "💵", cor: "#1b2a4a", hp: 4, kind: "tycoon" }
+  democracia:   { nome: "O MAGNATA ESTRANGEIRO", emoji: "💵", cor: "#1b2a4a", hp: 5, kind: "tycoon" }
 };
 
-/* ------------------------------- LEGENDA DOS MAPAS ----------------------
- *  ' ' vazio   'G' chão   'B' bloco   '=' plataforma
- *  '?' bloco surpresa (conta uma política)   'o' voto
- *  'E' político do atraso   'X' chefão   'P' início
- *  As últimas colunas de cada fase são uma ARENA limpa para o chefão.
- * ----------------------------------------------------------------------- */
+/* ------------------------------- PAINEL DO BRASIL ----------------------
+ * Indicadores reais (antes → agora). Cada um "melhora" quando o mapa com
+ * índice 'mapa' é concluído.  Fontes citadas no próprio painel.           */
+const PAINEL = [
+  { icon: "🍽️", nome: "Fome grave", antes: "33,1 mi", depois: "8,7 mi",
+    fonte: "pessoas · IBGE/Penssan 2022→2023", mapa: 0 },
+  { icon: "🗺️", nome: "Mapa da Fome (ONU)", antes: "Dentro", depois: "Fora",
+    fonte: "ONU/FAO · 2025", mapa: 0 },
+  { icon: "🩺", nome: "Saúde pública", antes: "Desmontada", depois: "Reconstruída",
+    fonte: "Mais Médicos + Farmácia Popular", mapa: 1 },
+  { icon: "💼", nome: "Desemprego", antes: "6,6%", depois: "5,1%",
+    fonte: "IBGE/PNAD 2024→2025 · recorde", mapa: 2 },
+  { icon: "🗳️", nome: "Democracia e soberania", antes: "Sob ameaça", depois: "Defendidas",
+    fonte: "2º turno · o povo decide", mapa: 3 }
+];
+
+/* ------------------------------- FASES ---------------------------------- */
 const LEVELS = [
   {
     nome: "Fase 1 — A Luta Contra a Fome",
@@ -113,7 +132,7 @@ const LEVELS = [
     corCeu1: "#ff9a3d", corCeu2: "#ffe0a8", tutorial: true,
     fatos: [
       "Você está conquistando o FOME ZERO: um conjunto de ações para acabar com a fome no Brasil.",
-      "Com ele, o Brasil saiu do Mapa da Fome da ONU em 2014.",
+      "Com ele, o Brasil saiu do Mapa da Fome da ONU em 2014 — e de novo em 2025.",
       "Você está conquistando o BOLSA FAMÍLIA: renda para milhões de famílias.",
       "Para receber, as crianças precisam estar na escola e com as vacinas em dia."
     ],
@@ -133,18 +152,18 @@ const LEVELS = [
     ]
   },
   {
-    nome: "Fase 2 — Saúde é Direito",
-    historiaInicio: "Com o povo comendo melhor, o governo mira a saúde: SUS mais forte, remédio barato e médico onde nunca teve.",
-    missao: "Enfrente O DESMONTE e reconstrua o atendimento de saúde para todos.",
+    nome: "Fase 2 — Saúde e Serviços para o Povo",
+    historiaInicio: "Com o povo comendo melhor, o governo mira a saúde e os serviços: médico, remédio e energia onde nunca teve.",
+    missao: "Enfrente O DESMONTE e reconstrua a saúde e os serviços públicos para todos.",
     chefe: "desmonte", cenario: "cidade",
     corCeu1: "#3d9bff", corCeu2: "#cfeaff", tutorial: false,
     fatos: [
       "Você está conquistando a FARMÁCIA POPULAR: remédios de graça ou baratos.",
-      "Ela atende tratamentos como pressão alta, diabetes e asma.",
       "Você está conquistando o MAIS MÉDICOS: atendimento onde faltava médico.",
-      "Milhões de pessoas passaram a ter um médico perto de casa."
+      "Milhões de pessoas passaram a ter um médico perto de casa.",
+      "Você está conquistando o LUZ PARA TODOS: energia elétrica para quem não tinha."
     ],
-    skills: ["🩺 Saúde pública ↑↑", "💊 Acesso a remédios ↑"],
+    skills: ["🩺 Saúde pública ↑↑", "💊 Acesso a remédios ↑", "💡 Energia no campo ↑"],
     rows: [
       "                                                          ",
       "                                                          ",
@@ -160,20 +179,20 @@ const LEVELS = [
     ]
   },
   {
-    nome: "Fase 3 — Trabalho e Dignidade",
-    historiaInicio: "A economia cresce e gera empregos. É hora de valorizar o salário mínimo e levar a casa própria às famílias.",
-    missao: "Derrote A DESIGUALDADE e devolva o que é de direito a quem trabalha.",
+    nome: "Fase 3 — Trabalho, Moradia e Futuro",
+    historiaInicio: "A economia cresce e o desemprego cai. É hora de valorizar o salário, dar a casa própria e abrir as portas da universidade.",
+    missao: "Derrote A DESIGUALDADE e devolva renda, moradia e estudo a quem trabalha.",
     chefe: "desigualdade", cenario: "campo",
     corCeu1: "#2fb15a", corCeu2: "#d6f6dd", tutorial: false,
     fatos: [
       "Você está conquistando o SALÁRIO MÍNIMO acima da inflação: mais poder de compra.",
       "Como a aposentadoria segue o mínimo, os idosos também ganham.",
       "Você está conquistando o MINHA CASA MINHA VIDA: a casa própria.",
-      "Menos aluguel pesando no bolso e muitos empregos gerados.",
-      "Você está conquistando a VALORIZAÇÃO DO TRABALHO: direitos e descanso.",
-      "Trabalho digno é ter tempo para a família."
+      "Você está conquistando o PROUNI: bolsas de faculdade para quem não podia pagar.",
+      "E novas universidades e institutos federais por todo o país.",
+      "O desemprego caiu ao menor nível da série histórica em 2025."
     ],
-    skills: ["💪 Renda e salário ↑", "🏠 Moradia ↑", "🗓️ Direitos do trabalho ↑"],
+    skills: ["💪 Renda e salário ↑", "🏠 Moradia ↑", "🎓 Educação ↑"],
     rows: [
       "                                                            ",
       "                                                            ",
@@ -189,20 +208,20 @@ const LEVELS = [
     ]
   },
   {
-    nome: "Fase 4 — Democracia e Soberania",
-    historiaInicio: "O Brasil ganha protagonismo no mundo — e precisa proteger sua democracia e soberania das ameaças que vêm de fora.",
-    missao: "Entre a fake news e a cobiça estrangeira pelas nossas riquezas, derrote O MAGNATA ESTRANGEIRO e defenda a educação, a energia e a democracia do Brasil.",
+    nome: "Fase 4 — O 2º Turno: Democracia e Soberania",
+    historiaInicio: "2º turno das eleições: a decisão. O Brasil escolhe entre avançar com direitos ou entregar nossas riquezas. Cada voto conta!",
+    missao: "No 2º turno, enfrente O MAGNATA ESTRANGEIRO e as fake news. Garanta o fim da escala 6x1, proteja o dinheiro do povo e defenda a democracia.",
     chefe: "democracia", cenario: "capital",
     corCeu1: "#8e4bd1", corCeu2: "#ead6ff", tutorial: false,
     fatos: [
-      "Você está conquistando o PROUNI: bolsas de faculdade para quem não podia pagar.",
-      "E novas universidades e institutos federais por todo o país.",
-      "Você está conquistando o LUZ PARA TODOS: energia elétrica para quem não tinha.",
-      "Luz em casa é estudo à noite e geladeira funcionando.",
-      "Você defende a DEMOCRACIA e a SOBERANIA contra a fake news.",
-      "O Brasil não está à venda: as nossas riquezas são do povo brasileiro."
+      "Você está conquistando o FIM DA ESCALA 6x1: mais descanso e menos adoecimento.",
+      "A PEC foi aprovada na Câmara e luta por votação no Senado.",
+      "Você protege o DINHEIRO DO POVO: o Banco Central liquidou a fraude do Banco Master.",
+      "O BRASIL NÃO SE VENDE: minérios, terras raras e o Pix são do povo.",
+      "Contra a fake news e a ingerência estrangeira: informação de verdade.",
+      "No 2º turno, quem decide o futuro do Brasil é você."
     ],
-    skills: ["🎓 Educação ↑", "💡 Energia ↑", "🛡️ Democracia e soberania ↑"],
+    skills: ["🗓️ Fim da escala 6x1 ↑", "🏦 Dinheiro do povo protegido ↑", "🛡️ Democracia e soberania ↑"],
     flyers: [[16,4],[30,3],[44,5],[52,4]],
     rows: [
       "                                                              ",
@@ -228,4 +247,4 @@ const MAPA_NOS = [
   { lon: -47.9, lat: -15.8 }    // Fase 4 — Centro (Brasília)
 ];
 
-window.SLW_DATA = { HISTORIA, HEROIS, CONQUISTAS, CHEFES, LEVELS, MAPA_NOS };
+window.SLW_DATA = { HISTORIA, HEROIS, CONQUISTAS, CHEFES, LEVELS, MAPA_NOS, PAINEL };

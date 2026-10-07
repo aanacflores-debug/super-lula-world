@@ -7,7 +7,7 @@
 (function () {
 "use strict";
 
-const { HISTORIA, HEROIS, CONQUISTAS, CHEFES, LEVELS, MAPA_NOS } = window.SLW_DATA;
+const { HISTORIA, HEROIS, CONQUISTAS, CHEFES, LEVELS, MAPA_NOS, PAINEL } = window.SLW_DATA;
 
 /* ----------------------------- Constantes ------------------------------- */
 const VIEW_W = 1280, VIEW_H = 704, TS = 64, ROWS = 11;
@@ -549,8 +549,11 @@ function showScene(s) {
   if (s!==Scene.PLAY) { document.getElementById("tutorial-hint").classList.add("hidden"); document.getElementById("fact-banner").classList.add("hidden"); }
 
   if (s===Scene.INTRO) renderIntroSlide();
-  if (s===Scene.MAP) document.getElementById("map-sub").textContent =
-    (completed>=LEVELS.length) ? "Tudo concluído! Clique para rejogar" : "Clique na fase que está brilhando";
+  if (s===Scene.MAP) {
+    document.getElementById("map-sub").textContent =
+      (completed>=LEVELS.length) ? "Tudo concluído! Clique para rejogar" : "Clique na fase que está brilhando";
+    updatePainel();
+  }
 }
 
 function primaryAction() {
@@ -622,6 +625,23 @@ function updateHUD() {
   document.getElementById("hud-vidas").textContent = vidas;
   document.getElementById("hud-votos").textContent = votos;
   document.getElementById("hud-feitos").textContent = collectedDeeds.length;
+}
+
+/* Painel do Brasil: indicadores reais que melhoram conforme as fases são vencidas. */
+function updatePainel() {
+  const el = document.getElementById("painel-br"); if (!el) return;
+  let html = '<div class="pn-title">📊 Painel do Brasil</div>';
+  PAINEL.forEach((p) => {
+    const ok = completed > p.mapa;
+    const val = ok
+      ? `<span class="pn-antes">${p.antes}</span> → ${p.depois}`
+      : `<span class="pn-antes">${p.antes}</span>`;
+    html += `<div class="pn-row ${ok?'pn-ok':''}">` +
+      `<span class="pn-ico">${p.icon}</span>` +
+      `<span class="pn-nome">${p.nome}<small>${p.fonte}</small></span>` +
+      `<span class="pn-val">${ok?'✓ ':''}${val}</span></div>`;
+  });
+  el.innerHTML = html;
 }
 
 /* ----------------------------- Partículas ------------------------------- */
@@ -996,6 +1016,7 @@ function drawHero(c, cx, topY, H, skin, facing, state, swing){
   const tY=y+H*0.3, tH=H*0.37, tW=W*(buff?0.82:0.62);
   c.fillStyle=shirt; roundRect(c,cx-tW/2,tY,tW,tH,buff?10:6); c.fill();
   c.fillStyle=shirtD; roundRect(c,cx-tW/2,tY+tH*0.55,tW,tH*0.45,buff?10:6); c.fill();
+  roundRect(c,cx-tW/2,tY,tW,tH,buff?10:6); c.strokeStyle="rgba(0,0,0,.22)"; c.lineWidth=2; c.stroke(); c.lineWidth=1; // contorno
   if(buff){ // peitoral marcado
     c.strokeStyle=shirtD; c.lineWidth=2;
     c.beginPath(); c.moveTo(cx,tY+tH*0.12); c.lineTo(cx,tY+tH*0.5); c.stroke();
@@ -1045,6 +1066,7 @@ function drawHero(c, cx, topY, H, skin, facing, state, swing){
   c.fillStyle=skinC; c.beginPath(); c.arc(hx+hw*0.45,hy+hh*0.56,hw*0.13,0,7); c.fill(); // orelha
   c.fillStyle=skinC; roundRect(c,hx-hw/2,hy+hh*0.06,hw,hh*0.94,hw*0.32); c.fill();
   c.fillStyle=skinD; roundRect(c,hx-hw/2,hy+hh*0.06,hw*0.26,hh*0.94,hw*0.32); c.fill(); // sombra lateral
+  roundRect(c,hx-hw/2,hy+hh*0.06,hw,hh*0.94,hw*0.32); c.strokeStyle="rgba(0,0,0,.16)"; c.lineWidth=1.8; c.stroke(); c.lineWidth=1; // contorno
   // cabelo grisalho (branco no Fortão)
   c.fillStyle=hairC;
   c.beginPath(); c.arc(hx,hy+hh*0.3,hw*0.55,Math.PI,0); c.fill();
@@ -1148,9 +1170,16 @@ function drawMap(){
     ctx.restore();
     // rótulo
     ctx.fillStyle="#15161a"; ctx.font="600 16px 'Fredoka'"; ctx.textAlign="center";
-    const label = CHEFES[LEVELS[i].chefe].nome;
     ctx.fillText("Fase "+(i+1), p.x, p.y+48);
   });
+  // bonequinho do Lula em cima do nó atual (estilo mapa do Mario)
+  const curIdx = Math.min(completed, mapNodePx.length-1);
+  const np = mapNodePx[curIdx];
+  if (np) {
+    const hero = HEROIS.find(h=>h.id===selectedChar) || HEROIS[0];
+    const hop = Math.abs(Math.sin(bgT*0.12))*6;
+    drawHero(ctx, np.x, np.y - 30 - 54 - hop, 54, hero.skin, 1, "idle", 0);
+  }
 }
 function handleMapClick(clientX, clientY){
   const rect=canvas.getBoundingClientRect();
