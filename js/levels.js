@@ -216,10 +216,10 @@ const LEVELS = [
 /* -------- Mapa do Brasil: posição de cada fase por região (0..1) -------- */
 /* Fase 1 Nordeste (sertão) · Fase 2 Sudeste · Fase 3 Sul · Fase 4 Centro(Brasília) */
 const MAPA_NOS = [
-  { x: 0.68, y: 0.27 },   // Fase 1 — Nordeste (sertão)
-  { x: 0.60, y: 0.56 },   // Fase 2 — Sudeste
-  { x: 0.49, y: 0.70 },   // Fase 3 — Sul
-  { x: 0.52, y: 0.47 }    // Fase 4 — Centro (Brasília)
+  { lon: -40.3, lat:  -8.5 },   // Fase 1 — Nordeste (sertão, PE/BA)
+  { lon: -46.6, lat: -22.5 },   // Fase 2 — Sudeste (São Paulo)
+  { lon: -51.2, lat: -29.8 },   // Fase 3 — Sul (RS)
+  { lon: -47.9, lat: -15.8 }    // Fase 4 — Centro (Brasília)
 ];
 
 window.SLW_DATA = { HISTORIA, HEROIS, CONQUISTAS, CHEFES, LEVELS, MAPA_NOS };

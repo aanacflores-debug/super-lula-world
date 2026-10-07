@@ -908,6 +908,27 @@ function drawParticles(){
 }
 
 /* ---- Mapa do Brasil ---- */
+/* Contorno do Brasil por coordenadas geográficas reais (lon, lat), sentido
+   horário a partir do norte. Projeção simples (equiretangular) no canvas. */
+const GEO_BR = [
+  [-60.2,5.2],[-59.8,4.6],[-55.9,2.5],[-51.6,4.1],[-50.0,1.8],[-48.5,-0.7],
+  [-44.3,-2.5],[-41.8,-2.9],[-38.5,-3.7],[-37.2,-4.9],[-35.2,-5.2],[-34.8,-7.1],
+  [-34.9,-8.1],[-35.7,-9.7],[-37.0,-11.0],[-38.5,-13.0],[-39.0,-15.8],[-39.7,-18.0],
+  [-40.3,-20.3],[-41.8,-22.0],[-43.2,-23.0],[-45.0,-23.6],[-46.6,-24.0],[-48.5,-25.5],
+  [-48.6,-27.6],[-49.7,-29.3],[-51.1,-30.9],[-52.1,-32.0],[-53.4,-33.7],[-55.6,-30.9],
+  [-57.6,-30.2],[-56.0,-27.5],[-54.6,-25.6],[-54.3,-24.0],[-55.7,-22.5],[-57.9,-22.1],
+  [-57.6,-19.0],[-60.2,-16.3],[-62.6,-13.0],[-65.4,-11.0],[-68.8,-11.0],[-70.6,-9.8],
+  [-72.2,-9.5],[-73.8,-7.5],[-72.9,-5.1],[-70.9,-4.4],[-69.4,-1.1],[-69.8,1.1],
+  [-67.3,1.9],[-65.5,0.9],[-64.0,1.9],[-62.0,4.1],[-60.7,5.0]
+];
+function brProj(){
+  const LON0=-74.0, LON1=-34.3, LAT0=-33.9, LAT1=5.4;
+  const padTop=80, padBot=48;
+  const mapH=VIEW_H-padTop-padBot, scale=mapH/(LAT1-LAT0);
+  const mapW=(LON1-LON0)*scale, ox=(VIEW_W-mapW)/2, oy=padTop;
+  return (lon,lat)=>[ ox+(lon-LON0)*scale, oy+(LAT1-lat)*scale ];
+}
+
 let mapNodePx = [];
 function drawMap(){
   const g=ctx.createLinearGradient(0,0,0,VIEW_H);
@@ -915,25 +936,22 @@ function drawMap(){
   ctx.fillStyle=g; ctx.fillRect(0,0,VIEW_W,VIEW_H);
   // "oceano" + contorno estilizado do Brasil
   ctx.save();
+  const P = brProj();
+  // sombra do mapa
+  ctx.fillStyle="rgba(0,0,0,.12)";
+  ctx.beginPath();
+  GEO_BR.forEach((p,i)=>{ const [X,Y]=P(p[0],p[1]); i?ctx.lineTo(X+6,Y+8):ctx.moveTo(X+6,Y+8); });
+  ctx.closePath(); ctx.fill();
+  // terra
   ctx.fillStyle="#f2e6c8";
   ctx.beginPath();
-  // contorno do Brasil (normalizado 0..1), sentido horário a partir do norte
-  const pts=[
-    [0.37,0.03],[0.44,0.07],[0.49,0.05],[0.52,0.10],[0.55,0.07],[0.57,0.13],
-    [0.63,0.15],[0.69,0.17],[0.74,0.20],[0.79,0.24],[0.80,0.28],[0.77,0.33],
-    [0.75,0.40],[0.72,0.46],[0.69,0.52],[0.65,0.58],[0.60,0.63],[0.55,0.68],
-    [0.51,0.73],[0.47,0.79],[0.44,0.83],[0.42,0.79],[0.41,0.73],[0.37,0.69],
-    [0.34,0.65],[0.31,0.61],[0.26,0.58],[0.20,0.55],[0.14,0.53],[0.12,0.49],
-    [0.15,0.46],[0.18,0.42],[0.20,0.37],[0.23,0.31],[0.26,0.24],[0.30,0.16],
-    [0.33,0.09]
-  ];
-  pts.forEach((p,i)=>{ const X=p[0]*VIEW_W, Y=p[1]*VIEW_H; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
+  GEO_BR.forEach((p,i)=>{ const [X,Y]=P(p[0],p[1]); i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
   ctx.closePath(); ctx.fill();
-  ctx.strokeStyle="#c9b78a"; ctx.lineWidth=4; ctx.stroke(); ctx.lineWidth=1;
+  ctx.strokeStyle="#c9b78a"; ctx.lineWidth=4; ctx.lineJoin="round"; ctx.stroke(); ctx.lineWidth=1;
   ctx.restore();
 
-  // caminho entre fases
-  mapNodePx = MAPA_NOS.map((n)=>({x:n.x*VIEW_W, y:n.y*VIEW_H}));
+  // caminho entre fases (posições por lon/lat reais)
+  mapNodePx = MAPA_NOS.map((n)=>{ const [x,y]=P(n.lon,n.lat); return {x,y}; });
   ctx.strokeStyle="rgba(0,0,0,.25)"; ctx.lineWidth=5; ctx.setLineDash([2,12]); ctx.lineCap="round";
   ctx.beginPath(); mapNodePx.forEach((p,i)=> i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.stroke();
   ctx.setLineDash([]); ctx.lineWidth=1;
