@@ -212,7 +212,7 @@ function resetPlayerAndEnemies() {
   const hero = HEROIS.find((h) => h.id === heroId) || HEROIS[0];
   player = { x:startPos.x, y:startPos.y, w:40, h:56, vx:0, vy:0, onGround:false,
              facing:1, t:0, invuln:0, alive:true,
-             jumpMul:hero.jump, speedMul:hero.speed, skin:hero.skin };
+             jumpMul:hero.jump||1, speedMul:hero.speed||1, skin:hero.skin, trait:hero.trait };
   enemies.forEach((e) => { e.x=e.sx; e.y=e.sy; e.vx=-ENEMY_SPD; e.vy=0; e.alive=true; });
   if (boss) { boss.x=boss.sx; boss.y=boss.sy; boss.hp=boss.maxhp; boss.alive=true; boss.vx=ENEMY_SPD*0.9; boss.vy=0; boss.invuln=0; }
   bossActive = false; bossDefeated = false;
@@ -317,24 +317,35 @@ function update() {
   updateHints();
 }
 
+function defeatEnemy(e, bounce){
+  e.alive=false;
+  if (bounce) player.vy=STOMP_VY;
+  spawnParticles(e.x+e.w/2, e.y+e.h/2, e.flying?"#e9e9ef":"#9a86b0", 12);
+  sfx("stomp");
+  if (player.trait==="moeda"){ votos+=5; spawnParticles(e.x+e.w/2, e.y, "#ffd12e", 10); updateHUD(); }
+}
 function updateEnemies() {
+  const aggro = player.trait==="aggro";
   enemies.forEach((e) => {
     if (!e.alive) return;
     if (e.flying) {
+      if (aggro) { e.vx = Math.sign(player.x - e.x) * ENEMY_SPD * 1.5 || e.vx; }
+      else if (e.x < e.sx - e.range || e.x > e.sx + e.range) e.vx = -e.vx;
       e.x += e.vx;
-      if (e.x < e.sx - e.range || e.x > e.sx + e.range) e.vx = -e.vx;
       const cc = Math.floor((e.x + (e.vx>0?e.w:0))/TS), cr = Math.floor((e.y+e.h/2)/TS);
       if (isSolidCell(cc, cr)) e.vx = -e.vx;
       e.y = e.baseY + Math.sin(e.t*0.12)*10;
     } else {
       e.vy += GRAVITY; if (e.vy>MAX_FALL) e.vy=MAX_FALL;
-      enemyMove(e, ENEMY_SPD);
+      if (aggro && e.onGround) e.vx = Math.sign(player.x - e.x) * ENEMY_SPD * 1.5 || e.vx;
+      enemyMove(e, aggro ? ENEMY_SPD*1.5 : ENEMY_SPD);
     }
     if (player.invuln===0 && deathTimer===0 && aabb(player, e)) {
-      if (player.vy>1.5 && (player.y+player.h)-e.y < 26) {
-        e.alive=false; player.vy=STOMP_VY;
-        spawnParticles(e.x+e.w/2, e.y+e.h/2, e.flying?"#e9e9ef":"#9a86b0", 12); sfx("stomp");
-      } else hurt();
+      const stomp = player.vy>1.5 && (player.y+player.h)-e.y < 26;
+      if (stomp) defeatEnemy(e, true);
+      else if (player.trait==="forte") defeatEnemy(e, false);   // derruba no esbarrão
+      else if (player.trait==="ileso") { /* passa ileso: sem dano */ }
+      else hurt();
     }
   });
 }
@@ -909,9 +920,12 @@ function drawPlayer(){
 function drawHero(c, cx, topY, H, skin, facing, state, swing){
   const W=H*0.76, y=topY, air=(state==="jump");
   const skinC="#e3ac81", skinD="#cf9568";
-  let shirt="#e11021", shirtD="#b60d1a", pants="#27407d", bare=true, hat="cap";
+  let shirt="#e11021", shirtD="#b60d1a", pants="#27407d", bare=true, hat="cap", buff=false;
+  let hairC="#d8d8dd", beardC="#d3d3d9", browC="#cfcfd4";
   if(skin==="suit"){ shirt="#71767f"; shirtD="#585d67"; pants="#565b65"; bare=false; hat=null; }
   if(skin==="hat"){  shirt="#f2eee2"; shirtD="#d9d3c2"; pants="#c7bb9c"; bare=false; hat="panama"; }
+  if(skin==="forte"){ shirt="#e11021"; shirtD="#b60d1a"; pants="#2a2d3a"; bare=true; hat=null; buff=true;
+                      hairC="#ffffff"; beardC="#f6f6f8"; browC="#ffffff"; }
 
   c.save();
   c.translate(cx,y); c.scale(facing,1); c.translate(-cx,-y);
@@ -929,19 +943,38 @@ function drawHero(c, cx, topY, H, skin, facing, state, swing){
   c.fillRect(cx-W*0.27,y+H-H*0.08,lw+W*0.05,H*0.08);
   c.fillRect(cx+W*0.03,y+H-H*0.08,lw+W*0.05,H*0.08);
 
-  // tronco
-  const tY=y+H*0.3, tH=H*0.37, tW=W*0.62;
-  c.fillStyle=shirt; roundRect(c,cx-tW/2,tY,tW,tH,6); c.fill();
-  c.fillStyle=shirtD; roundRect(c,cx-tW/2,tY+tH*0.55,tW,tH*0.45,6); c.fill();
+  // tronco (mais largo se for o Fortão)
+  const tY=y+H*0.3, tH=H*0.37, tW=W*(buff?0.82:0.62);
+  c.fillStyle=shirt; roundRect(c,cx-tW/2,tY,tW,tH,buff?10:6); c.fill();
+  c.fillStyle=shirtD; roundRect(c,cx-tW/2,tY+tH*0.55,tW,tH*0.45,buff?10:6); c.fill();
+  if(buff){ // peitoral marcado
+    c.strokeStyle=shirtD; c.lineWidth=2;
+    c.beginPath(); c.moveTo(cx,tY+tH*0.12); c.lineTo(cx,tY+tH*0.5); c.stroke();
+    c.beginPath(); c.arc(cx-tW*0.2,tY+tH*0.2,tW*0.16,0.2,1.2); c.arc(cx+tW*0.2,tY+tH*0.2,tW*0.16,Math.PI-1.2,Math.PI-0.2); c.stroke();
+    c.lineWidth=1;
+  }
 
-  // braços (manga + antebraço + mão)
-  const aUp=H*0.17, aLo=H*0.14, aw=W*0.14, upY=tY+2;
+  // braços (manga + antebraço + mão) — maiores e musculosos no Fortão
+  const aUp=H*(buff?0.19:0.17), aLo=H*(buff?0.17:0.14), aw=W*(buff?0.2:0.14), upY=tY+2;
   for(const side of [-1,1]){
     const ax = side<0 ? cx-tW/2-aw+2 : cx+tW/2-2;
     const sgn = air ? (side<0?1:-1)*0.5 : (side<0?-swing:swing);
-    c.fillStyle=shirt; c.fillRect(ax,upY,aw,aUp);
-    c.fillStyle=bare?skinC:shirt; c.fillRect(ax,upY+aUp,aw,aLo+sgn*3);
-    c.fillStyle=skinC; c.fillRect(ax,upY+aUp+aLo+sgn*3,aw,H*0.055);
+    if(buff){
+      // bíceps avantajado
+      c.fillStyle=skinC; c.beginPath(); c.ellipse(ax+aw/2, upY+aUp*0.5, aw*0.62, aUp*0.72, 0, 0, 7); c.fill();
+      c.fillStyle=skinD; c.beginPath(); c.arc(ax+aw*(side<0?0.3:0.7), upY+aUp*0.5, aw*0.22, 0, 7); c.fill();
+      c.fillStyle=skinC; c.fillRect(ax+aw*0.1, upY+aUp, aw*0.8, aLo+sgn*3);
+      c.fillStyle=skinC; c.beginPath(); c.arc(ax+aw/2, upY+aUp+aLo+sgn*3, aw*0.42, 0, 7); c.fill(); // punho
+    } else {
+      c.fillStyle=shirt; c.fillRect(ax,upY,aw,aUp);
+      c.fillStyle=bare?skinC:shirt; c.fillRect(ax,upY+aUp,aw,aLo+sgn*3);
+      c.fillStyle=skinC; c.fillRect(ax,upY+aUp+aLo+sgn*3,aw,H*0.055);
+    }
+  }
+  if(buff){ // alças da regata vermelha
+    c.fillStyle=shirt;
+    c.fillRect(cx-tW*0.34, tY, tW*0.16, tH*0.3);
+    c.fillRect(cx+tW*0.18, tY, tW*0.16, tH*0.3);
   }
 
   // detalhes da roupa
@@ -963,12 +996,12 @@ function drawHero(c, cx, topY, H, skin, facing, state, swing){
   c.fillStyle=skinC; c.beginPath(); c.arc(hx+hw*0.45,hy+hh*0.56,hw*0.13,0,7); c.fill(); // orelha
   c.fillStyle=skinC; roundRect(c,hx-hw/2,hy+hh*0.06,hw,hh*0.94,hw*0.32); c.fill();
   c.fillStyle=skinD; roundRect(c,hx-hw/2,hy+hh*0.06,hw*0.26,hh*0.94,hw*0.32); c.fill(); // sombra lateral
-  // cabelo grisalho
-  c.fillStyle="#d8d8dd";
+  // cabelo grisalho (branco no Fortão)
+  c.fillStyle=hairC;
   c.beginPath(); c.arc(hx,hy+hh*0.3,hw*0.55,Math.PI,0); c.fill();
   c.fillRect(hx-hw*0.55,hy+hh*0.3,hw*0.12,hh*0.42); c.fillRect(hx+hw*0.43,hy+hh*0.3,hw*0.12,hh*0.36);
-  // barba + bigode grisalhos
-  c.fillStyle="#d3d3d9";
+  // barba + bigode
+  c.fillStyle=beardC;
   c.beginPath(); c.moveTo(hx-hw*0.46,hy+hh*0.52); c.quadraticCurveTo(hx,hy+hh*1.14,hx+hw*0.46,hy+hh*0.52);
   c.lineTo(hx+hw*0.46,hy+hh*0.64); c.quadraticCurveTo(hx,hy+hh*0.96,hx-hw*0.46,hy+hh*0.64); c.closePath(); c.fill();
   c.fillRect(hx-hw*0.24,hy+hh*0.56,hw*0.48,hh*0.08); // bigode
@@ -976,7 +1009,7 @@ function drawHero(c, cx, topY, H, skin, facing, state, swing){
   c.fillStyle="#fff"; c.beginPath(); c.arc(hx-hw*0.16,hy+hh*0.45,hw*0.1,0,7); c.arc(hx+hw*0.16,hy+hh*0.45,hw*0.1,0,7); c.fill();
   c.fillStyle="#2a2320"; c.beginPath(); c.arc(hx-hw*0.13,hy+hh*0.46,hw*0.05,0,7); c.arc(hx+hw*0.19,hy+hh*0.46,hw*0.05,0,7); c.fill();
   // sobrancelhas
-  c.strokeStyle="#cfcfd4"; c.lineWidth=2.5;
+  c.strokeStyle=browC; c.lineWidth=2.5;
   c.beginPath(); c.moveTo(hx-hw*0.27,hy+hh*0.34); c.lineTo(hx-hw*0.05,hy+hh*0.37);
   c.moveTo(hx+hw*0.05,hy+hh*0.37); c.lineTo(hx+hw*0.27,hy+hh*0.34); c.stroke();
   // sorriso

@@ -171,10 +171,10 @@ h2{
 .intro-nav .ghost-btn{width:auto;margin:0;}
 
 /* ---------------- Seleção de personagem ---------------- */
-.char-box{width:min(94%,560px);}
-.char-list{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+.char-box{width:min(96%,680px);}
+.char-list{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
 .char-card{
-  flex:1 1 140px;max-width:170px;cursor:pointer;
+  flex:1 1 140px;max-width:155px;cursor:pointer;
   background:#fff;border:3px solid var(--preto);border-radius:14px;padding:10px;
   transition:transform .08s;
 }

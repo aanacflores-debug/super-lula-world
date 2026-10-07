@@ -39,9 +39,14 @@ const HISTORIA = [
 /* ------------------------------- SKINS DO LULA -------------------------- */
 /* Só o Lula, em três visuais. Mesma jogabilidade (cosmético). */
 const HEROIS = [
-  { id: "militante",  nome: "Lula Militante",  desc: "Camiseta e boné vermelhos", jump: 1.0, speed: 1.0, skin: "red" },
-  { id: "presidente", nome: "Lula Presidente", desc: "Terno cinza",               jump: 1.0, speed: 1.0, skin: "suit" },
-  { id: "povo",       nome: "Lula do Povo",    desc: "Camisa branca e chapéu",    jump: 1.0, speed: 1.0, skin: "hat" }
+  { id: "militante",  nome: "Lula Militante",  skin: "red",   trait: "aggro",
+    desc: "Ímã de confusão: chama a atenção e os políticos correm atrás de você — tem que enfrentar! 🔥" },
+  { id: "presidente", nome: "Lula Presidente", skin: "suit",  trait: "ileso",
+    desc: "De terninho pra confundir os políticos: passa ileso, não toma dano no esbarrão. 🕴️" },
+  { id: "povo",       nome: "Lula do Povo",    skin: "hat",   trait: "moeda",
+    desc: "Raiz, de chapéu e camisa branca: ganha votos extras ao derrotar os políticos. 🎩" },
+  { id: "fortao",     nome: "Lula Fortão",     skin: "forte", trait: "forte",
+    desc: "Marombeiro de barba branca, bombadão: derruba político no soco, só de encostar! 💪" }
 ];
 
 /* ------------------------------- CONQUISTAS (conteúdo educativo) -------- */
