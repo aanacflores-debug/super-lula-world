@@ -171,7 +171,8 @@ function loadLevel(idx) {
         case "X":
           boss = { x:px, y:py-TS, w:TS*1.6, h:TS*1.75, vx:ENEMY_SPD*0.9, vy:0,
                    hp:chefeDef.hp, maxhp:chefeDef.hp, alive:true, onGround:false,
-                   t:0, invuln:0, sx:px, sy:py-TS, hopT:60 };
+                   t:0, invuln:0, sx:px, sy:py-TS, hopT:60,
+                   leftBound: px - 6*TS + 6, kind: chefeDef.kind || "blob" };
           gridRow.push(" "); break;
         default: gridRow.push(ch);
       }
@@ -260,11 +261,11 @@ function headBonk(c, r) {
     if (factIndex < fatos.length) { showFact(fatos[factIndex]); factIndex++; }
   }
 }
-function showFact(text){
+function showFact(text, tag, frames){
   const el = document.getElementById("fact-banner");
-  el.innerHTML = "<span class='fb-tag'>📖 A HISTÓRIA DO LULA</span>" + text;
+  el.innerHTML = "<span class='fb-tag'>" + (tag || "📖 A HISTÓRIA DO LULA") + "</span>" + text;
   el.classList.remove("hidden");
-  factTimer = 380; // ~6s
+  factTimer = frames || 380; // ~6s
 }
 
 /* ----------------------------- Update ----------------------------------- */
@@ -384,6 +385,7 @@ function updateBoss() {
   boss.hopT--;
   if (boss.onGround && boss.hopT<=0) { boss.vy = -12; boss.hopT = 90 + Math.random()*60; }
   enemyMove(boss, Math.abs(boss.vx));
+  if (boss.x < boss.leftBound) { boss.x = boss.leftBound; boss.vx = Math.abs(boss.vx); } // fica na arena
   if (boss.invuln>0) boss.invuln--;
 
   if (player.invuln===0 && deathTimer===0 && aabb(player, boss)) {
@@ -519,6 +521,9 @@ function enterLevel(idx) {
 function startLevelPlay() {
   loadLevel(levelIndex);
   showScene(Scene.PLAY);
+  // card de história no topo, contextualizando a era deste mapa
+  const h = LEVELS[levelIndex].historiaInicio;
+  if (h) showFact(h, "📖 A HISTÓRIA — FASE " + (levelIndex + 1), 540);
 }
 function togglePause() {
   if (scene === Scene.PLAY) showScene(Scene.PAUSE);
@@ -889,22 +894,66 @@ function drawBoss(){
   const def=CHEFES[LEVELS[levelIndex].chefe];
   const flash=(b.invuln>0 && Math.floor(b.t/4)%2===0);
   ctx.save();
-  // corpo grande e sombrio
-  ctx.fillStyle=flash?"#ffffff":def.cor; roundRect(ctx,b.x,b.y+bob,b.w,b.h,16); ctx.fill();
-  ctx.fillStyle="rgba(0,0,0,.18)"; roundRect(ctx,b.x+6,b.y+b.h*0.55+bob,b.w-12,b.h*0.4,12); ctx.fill();
-  // chifres / coroa de atraso
-  ctx.fillStyle=shade(def.cor,-.3);
-  ctx.beginPath(); ctx.moveTo(b.x+18,b.y+bob+6); ctx.lineTo(b.x+6,b.y+bob-18); ctx.lineTo(b.x+34,b.y+bob+2); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(b.x+b.w-18,b.y+bob+6); ctx.lineTo(b.x+b.w-6,b.y+bob-18); ctx.lineTo(b.x+b.w-34,b.y+bob+2); ctx.fill();
-  // olhos bravos
-  ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(cx-20,cy-12,11,0,7); ctx.arc(cx+20,cy-12,11,0,7); ctx.fill();
-  ctx.fillStyle="#c01020"; const look=b.vx>0?3:-3; ctx.beginPath(); ctx.arc(cx-20+look,cy-12,5,0,7); ctx.arc(cx+20+look,cy-12,5,0,7); ctx.fill();
-  ctx.strokeStyle="#000"; ctx.lineWidth=4;
-  ctx.beginPath(); ctx.moveTo(cx-32,cy-26); ctx.lineTo(cx-10,cy-16); ctx.moveTo(cx+32,cy-26); ctx.lineTo(cx+10,cy-16); ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx,cy+20,12,Math.PI,0); ctx.stroke(); ctx.lineWidth=1;
-  // emoji símbolo
-  ctx.font="26px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(def.emoji, cx, cy+2);
+  if (def.kind==="tycoon") drawTycoonBoss(b,cx,cy,bob,def,flash);
+  else drawBlobBoss(b,cx,cy,bob,def,flash);
   ctx.restore();
+}
+/* Chefão-problema: criatura arredondada (SEM chifres de diabo). */
+function drawBlobBoss(b,cx,cy,bob,def,flash){
+  const look=b.vx>0?3:-3;
+  ctx.fillStyle=flash?"#ffffff":def.cor; roundRect(ctx,b.x,b.y+bob,b.w,b.h,24); ctx.fill();
+  ctx.fillStyle="rgba(0,0,0,.16)"; roundRect(ctx,b.x+6,b.y+b.h*0.56+bob,b.w-12,b.h*0.4,18); ctx.fill();
+  // orelhinhas redondas (não chifres)
+  ctx.fillStyle=flash?"#ffffff":def.cor;
+  ctx.beginPath(); ctx.arc(b.x+b.w*0.24,b.y+bob+2,11,0,7); ctx.arc(b.x+b.w*0.76,b.y+bob+2,11,0,7); ctx.fill();
+  // olhos
+  ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(cx-20,cy-10,12,0,7); ctx.arc(cx+20,cy-10,12,0,7); ctx.fill();
+  ctx.fillStyle="#c01020"; ctx.beginPath(); ctx.arc(cx-20+look,cy-10,5,0,7); ctx.arc(cx+20+look,cy-10,5,0,7); ctx.fill();
+  // sobrancelhas bravas
+  ctx.strokeStyle="#15161a"; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(cx-32,cy-24); ctx.lineTo(cx-10,cy-14); ctx.moveTo(cx+32,cy-24); ctx.lineTo(cx+10,cy-14); ctx.stroke();
+  // carranca com dentes
+  ctx.fillStyle="#2a1a1a"; roundRect(ctx,cx-20,cy+8,40,14,5); ctx.fill();
+  ctx.fillStyle="#fff"; for(let i=0;i<4;i++) ctx.fillRect(cx-16+i*10,cy+8,6,6);
+  ctx.lineWidth=1;
+  ctx.font="24px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(def.emoji, cx, cy+b.h*0.32);
+}
+/* Chefão final: caricatura satírica (estilo charge) da ameaça estrangeira à
+   soberania — figura de terno, topete loiro e gravata vermelha. Não é pessoa
+   real nomeada; é sátira política. */
+function drawTycoonBoss(b,cx,cy,bob,def,flash){
+  const look=b.vx>0?2:-2;
+  const hw=b.w*0.6, hh=b.h*0.42, hx=cx, hy=b.y+bob+6;
+  const skin=flash?"#ffffff":"#f0a86a";
+  // terno
+  ctx.fillStyle=flash?"#ffffff":def.cor; roundRect(ctx,b.x+b.w*0.08,b.y+b.h*0.44+bob,b.w*0.84,b.h*0.56,12); ctx.fill();
+  // camisa branca (V)
+  ctx.fillStyle="#f4f4f0";
+  ctx.beginPath(); ctx.moveTo(cx-b.w*0.12,b.y+b.h*0.44+bob); ctx.lineTo(cx,b.y+b.h*0.66+bob); ctx.lineTo(cx+b.w*0.12,b.y+b.h*0.44+bob); ctx.closePath(); ctx.fill();
+  // gravata vermelha comprida
+  ctx.fillStyle="#d11a2a";
+  ctx.beginPath(); ctx.moveTo(cx-6,b.y+b.h*0.46+bob); ctx.lineTo(cx+6,b.y+b.h*0.46+bob); ctx.lineTo(cx+9,b.y+b.h*0.99+bob); ctx.lineTo(cx,b.y+b.h*1.05+bob); ctx.lineTo(cx-9,b.y+b.h*0.99+bob); ctx.closePath(); ctx.fill();
+  // cabeça bronzeada
+  ctx.fillStyle=skin; roundRect(ctx,hx-hw/2,hy,hw,hh,hw*0.28); ctx.fill();
+  // topete loiro
+  ctx.fillStyle=flash?"#ffffff":"#f2d479";
+  ctx.beginPath();
+  ctx.moveTo(hx-hw*0.54,hy+hh*0.32);
+  ctx.quadraticCurveTo(hx-hw*0.62,hy-hh*0.3, hx+hw*0.2,hy-hh*0.12);
+  ctx.quadraticCurveTo(hx+hw*0.68,hy-hh*0.02, hx+hw*0.5,hy+hh*0.28);
+  ctx.quadraticCurveTo(hx,hy+hh*0.04, hx-hw*0.54,hy+hh*0.32);
+  ctx.closePath(); ctx.fill();
+  // olhos pequenos
+  ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(hx-hw*0.17,hy+hh*0.52,hw*0.09,0,7); ctx.arc(hx+hw*0.17,hy+hh*0.52,hw*0.09,0,7); ctx.fill();
+  ctx.fillStyle="#1a2a66"; ctx.beginPath(); ctx.arc(hx-hw*0.15+look,hy+hh*0.52,hw*0.04,0,7); ctx.arc(hx+hw*0.19+look,hy+hh*0.52,hw*0.04,0,7); ctx.fill();
+  // sobrancelhas loiras franzidas
+  ctx.strokeStyle=flash?"#ffffff":"#d9b85a"; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(hx-hw*0.28,hy+hh*0.38); ctx.lineTo(hx-hw*0.06,hy+hh*0.44);
+  ctx.moveTo(hx+hw*0.06,hy+hh*0.44); ctx.lineTo(hx+hw*0.28,hy+hh*0.38); ctx.stroke();
+  // boca em bico (carranca)
+  ctx.strokeStyle="#9a4a3a"; ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(hx,hy+hh*0.8,hw*0.1,hh*0.07,0,0,7); ctx.stroke();
+  ctx.lineWidth=1;
+  ctx.font="22px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(def.emoji, cx, b.y+b.h*0.76+bob);
 }
 
 /* ---- Heróis (jogador e cards) ---- */

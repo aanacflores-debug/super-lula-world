@@ -1,17 +1,15 @@
 /* ============================================================================
  * SUPER LULA WORLD — dados do jogo (JOGO EDUCATIVO)
- * Objetivo: ensinar, de forma lúdica, políticas e conquistas do governo Lula.
  *
  * ESTRUTURA NARRATIVA
  *  - INTRO: a história do Lula (do sertão à presidência).
- *  - Cada MAPA tem um tema/era e um CHEFÃO (um grande problema do país).
- *  - Os blocos '?' explicam, durante a fase, as POLÍTICAS daquele mapa
- *    (você vai "conquistando" cada uma).
+ *  - No COMEÇO de cada mapa, um card no topo traz um trecho da história (era).
+ *  - Os blocos '?' explicam as POLÍTICAS daquele mapa (você as conquista).
  *  - Ao fim do mapa: recap do que foi conquistado + o que melhorou no Brasil.
+ *  - Chefão de cada fase = um grande PROBLEMA; no final, a ameaça estrangeira.
  *
- * TOM: tributo positivo e didático. Vilões = "políticos do atraso"
- * (caricaturas genéricas) e, no fim, a desinformação/fake news e a ameaça
- * à soberania — nunca pessoas reais específicas.
+ * Vilões = "políticos do atraso" (caricaturas genéricas). O chefão final é uma
+ * caricatura satírica (estilo charge) da ameaça estrangeira à soberania.
  * ==========================================================================*/
 
 /* ------------------------------- HISTÓRIA (intro) ----------------------- */
@@ -37,7 +35,6 @@ const HISTORIA = [
 ];
 
 /* ------------------------------- SKINS DO LULA -------------------------- */
-/* Só o Lula, em três visuais. Mesma jogabilidade (cosmético). */
 const HEROIS = [
   { id: "militante",  nome: "Lula Militante",  skin: "red",   trait: "aggro",
     desc: "Ímã de confusão: chama a atenção e os políticos correm atrás de você — tem que enfrentar! 🔥" },
@@ -91,24 +88,27 @@ const CONQUISTAS = {
   ]
 };
 
-/* ------------------------------- CHEFÕES -------------------------------- */
+/* ------------------------------- CHEFÕES --------------------------------
+ * 'kind' muda o desenho do chefão: 'blob' = criatura (problema),
+ * 'tycoon' = caricatura satírica da ameaça estrangeira (estilo charge).  */
 const CHEFES = {
-  fome:         { nome: "A FOME",                emoji: "🍽️", cor: "#6b4a2a", hp: 3 },
-  desmonte:     { nome: "O DESMONTE",            emoji: "🏚️", cor: "#5a6472", hp: 3 },
-  desigualdade: { nome: "A DESIGUALDADE",        emoji: "⚖️", cor: "#7a5a86", hp: 4 },
-  democracia:   { nome: "A AMEAÇA À DEMOCRACIA", emoji: "📢", cor: "#8a2b2b", hp: 4 }
+  fome:         { nome: "A FOME",               emoji: "🍽️", cor: "#6b4a2a", hp: 3, kind: "blob" },
+  desmonte:     { nome: "O DESMONTE",           emoji: "🏚️", cor: "#5a6472", hp: 3, kind: "blob" },
+  desigualdade: { nome: "A DESIGUALDADE",       emoji: "⚖️", cor: "#7a5a86", hp: 4, kind: "blob" },
+  democracia:   { nome: "O MAGNATA ESTRANGEIRO", emoji: "💵", cor: "#1b2a4a", hp: 4, kind: "tycoon" }
 };
 
 /* ------------------------------- LEGENDA DOS MAPAS ----------------------
  *  ' ' vazio   'G' chão   'B' bloco   '=' plataforma
  *  '?' bloco surpresa (conta uma política)   'o' voto
  *  'E' político do atraso   'X' chefão   'P' início
- *  Espaços na linha do chão = BURACO.   flyers = inimigos "fake news" (voam).
+ *  As últimas colunas de cada fase são uma ARENA limpa para o chefão.
  * ----------------------------------------------------------------------- */
 const LEVELS = [
   {
     nome: "Fase 1 — A Luta Contra a Fome",
-    missao: "2003. O país recomeça pelo mais urgente: ninguém pode passar fome. Atravesse o sertão, derrote A FOME e leve comida à mesa do povo.",
+    historiaInicio: "2003: Lula assume a presidência. O país ainda convive com a fome — e combatê-la vira a prioridade número um.",
+    missao: "Atravesse o sertão, derrote A FOME e leve comida à mesa do povo.",
     chefe: "fome", cenario: "sertao",
     corCeu1: "#ff9a3d", corCeu2: "#ffe0a8", tutorial: true,
     fatos: [
@@ -128,13 +128,14 @@ const LEVELS = [
       "        ?         ?            ?      ?             ",
       "          oo   oo     oo   oo       oo              ",
       "              ====        ====     =====            ",
-      " P                  E         E          E     X    ",
+      " P                  E         E                X    ",
       "GGGGGGGGGG  GGGGGGGGGG  GGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     ]
   },
   {
     nome: "Fase 2 — Saúde é Direito",
-    missao: "Com o povo alimentado, é hora de cuidar da saúde. Enfrente O DESMONTE e reconstrua o atendimento para todos.",
+    historiaInicio: "Com o povo comendo melhor, o governo mira a saúde: SUS mais forte, remédio barato e médico onde nunca teve.",
+    missao: "Enfrente O DESMONTE e reconstrua o atendimento de saúde para todos.",
     chefe: "desmonte", cenario: "cidade",
     corCeu1: "#3d9bff", corCeu2: "#cfeaff", tutorial: false,
     fatos: [
@@ -152,15 +153,16 @@ const LEVELS = [
       "                                                          ",
       "                                                          ",
       "      ?         ?             ?             ?             ",
-      "         oo   oo     oo    oo     oo     oo     oo        ",
-      "        ====        ====         ====          ====       ",
+      "         oo   oo     oo    oo     oo     oo     o         ",
+      "        ====        ====         ====          ==         ",
       " P          E           E             E      E         X  ",
       "GGGGGGGGGGGGGG  GGGGGGGGGGG  GGGGGGGGGGGG  GGGGGGGGGGGGGGG"
     ]
   },
   {
     nome: "Fase 3 — Trabalho e Dignidade",
-    missao: "Agora, trabalho e moradia para viver com dignidade. Derrote A DESIGUALDADE e devolva o que é de direito a quem trabalha.",
+    historiaInicio: "A economia cresce e gera empregos. É hora de valorizar o salário mínimo e levar a casa própria às famílias.",
+    missao: "Derrote A DESIGUALDADE e devolva o que é de direito a quem trabalha.",
     chefe: "desigualdade", cenario: "campo",
     corCeu1: "#2fb15a", corCeu2: "#d6f6dd", tutorial: false,
     fatos: [
@@ -179,16 +181,17 @@ const LEVELS = [
       "                                                            ",
       "                                                            ",
       "                                                            ",
-      "    ?            ?      ?         ?         ?         ?     ",
-      "       oo       oo oo        oo       oo       oo  oo       ",
+      "    ?            ?      ?         ?         ?               ",
+      "       oo       oo oo        oo       oo       oo           ",
       "      ====        ====      ====     ====     ====          ",
-      " P         E          E          E        E        E     X  ",
+      " P         E          E          E        E              X  ",
       "GGGGGGGGGGGGG  GGGGGGGGGGG  GGGGGGGGGGGGGGGGG  GGGGGGGGGGGGG"
     ]
   },
   {
-    nome: "Fase 4 — Democracia e Futuro",
-    missao: "A última batalha. Entre a FAKE NEWS, os canais que desinformam e a ingerência estrangeira, defenda a educação, a energia e a DEMOCRACIA do Brasil.",
+    nome: "Fase 4 — Democracia e Soberania",
+    historiaInicio: "O Brasil ganha protagonismo no mundo — e precisa proteger sua democracia e soberania das ameaças que vêm de fora.",
+    missao: "Entre a fake news e a cobiça estrangeira pelas nossas riquezas, derrote O MAGNATA ESTRANGEIRO e defenda a educação, a energia e a democracia do Brasil.",
     chefe: "democracia", cenario: "capital",
     corCeu1: "#8e4bd1", corCeu2: "#ead6ff", tutorial: false,
     fatos: [
@@ -197,10 +200,10 @@ const LEVELS = [
       "Você está conquistando o LUZ PARA TODOS: energia elétrica para quem não tinha.",
       "Luz em casa é estudo à noite e geladeira funcionando.",
       "Você defende a DEMOCRACIA e a SOBERANIA contra a fake news.",
-      "Informação de verdade e independência: o Brasil decide o seu futuro."
+      "O Brasil não está à venda: as nossas riquezas são do povo brasileiro."
     ],
     skills: ["🎓 Educação ↑", "💡 Energia ↑", "🛡️ Democracia e soberania ↑"],
-    flyers: [[16,4],[30,3],[44,5],[53,4]],   // inimigos "fake news" (voam)
+    flyers: [[16,4],[30,3],[44,5],[52,4]],
     rows: [
       "                                                              ",
       "                                                              ",
@@ -208,11 +211,11 @@ const LEVELS = [
       "                                                              ",
       "                                                              ",
       "                                                              ",
-      "    ?           ?             ?      ?          ?         ?   ",
-      "        oo oo     oo    oo     oo     oo oo      oo   oo      ",
-      "      ====      ====        ====    ====      ====      ====  ",
+      "    ?           ?             ?      ?          ?             ",
+      "        oo oo     oo    oo     oo     oo oo      oo           ",
+      "      ====      ====        ====    ====      ====            ",
       " P        E         E            E          E       E       X ",
-      "GGGGGGGGGGG  GGGGGGGGGGG  GGGGGGGGGGGGGGG  GGGGGGGGGGG  GGGGGG"
+      "GGGGGGGGGGG  GGGGGGGGGGG  GGGGGGGGGGGGGGG  GGGGGGGGGGGGGGGGGGG"
     ]
   }
 ];
