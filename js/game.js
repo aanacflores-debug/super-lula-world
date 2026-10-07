@@ -552,11 +552,26 @@ function primaryAction() {
 }
 
 /* ----------------------------- Intro ------------------------------------ */
+/* Bandeira do Brasil desenhada em SVG (não depende de emoji, que não
+   renderiza no Windows). */
+const BR_FLAG_SVG = '<svg viewBox="0 0 100 70" style="height:80%;border:3px solid #15161a;border-radius:6px" xmlns="http://www.w3.org/2000/svg">' +
+  '<rect width="100" height="70" fill="#009c3b"/>' +
+  '<polygon points="50,7 92,35 50,63 8,35" fill="#ffdf00"/>' +
+  '<circle cx="50" cy="35" r="15" fill="#002776"/>' +
+  '<path d="M37 31 A 18 18 0 0 1 63 31" fill="none" stroke="#fff" stroke-width="2.4"/>' +
+  '</svg>';
+
 function renderIntroSlide() {
   const s = HISTORIA[introStep];
-  const artEmoji = { brasil:"🇧🇷", crianca:"👦", trabalho:"🔧", sindicato:"✊",
-                     presidente:"🎖️", vamos:"🚀" }[s.art] || "🇧🇷";
-  document.getElementById("intro-art").textContent = artEmoji;
+  const artEl = document.getElementById("intro-art");
+  if (s.art === "brasil" || s.art === "vamos") {
+    const extra = s.art === "vamos"
+      ? '<span style="font-size:clamp(34px,9vw,56px);margin-left:10px">🚀</span>' : '';
+    artEl.innerHTML = BR_FLAG_SVG + extra;
+  } else {
+    const e = { crianca:"👦", trabalho:"🔧", sindicato:"✊", presidente:"🎖️" }[s.art] || "⭐";
+    artEl.innerHTML = '<span style="font-size:clamp(46px,12vw,76px)">' + e + '</span>';
+  }
   document.getElementById("intro-titulo").textContent = s.titulo;
   document.getElementById("intro-texto").textContent = s.texto;
   const dots = document.getElementById("intro-dots"); dots.innerHTML = "";

@@ -32,7 +32,7 @@ const HISTORIA = [
     texto: "Depois de concorrer três vezes, foi eleito presidente em 2002 e começou a reconstruir o país.",
     art: "presidente" },
   { titulo: "Sua missão",
-    texto: "Atravesse o Brasil, conquiste as políticas que mudaram vidas e melhore as áreas do país. Vamos juntos! 🇧🇷",
+    texto: "Atravesse o Brasil, conquiste as políticas que mudaram vidas e melhore as áreas do país. Vamos juntos!",
     art: "vamos" }
 ];
 
@@ -80,7 +80,7 @@ const CONQUISTAS = {
     { nome: "Luz para Todos", emoji: "💡",
       texto: "Levou energia elétrica a milhões de pessoas no campo e em regiões isoladas.",
       sabia: "Luz em casa é estudo à noite, geladeira e dignidade." },
-    { nome: "Soberania e Democracia", emoji: "🇧🇷",
+    { nome: "Soberania e Democracia", emoji: "🗳️",
       texto: "Defesa do Brasil, das instituições e do direito do povo de escolher seu futuro — contra a desinformação e a ingerência estrangeira.",
       sabia: "Democracia é o povo decidindo — e é preciso defendê-la todo dia." }
   ]
