@@ -105,6 +105,7 @@ document.querySelectorAll(".tbtn").forEach((btn) => {
   btn.addEventListener("pointerleave", r);
 });
 const touchEnabled = window.matchMedia("(hover:none) and (pointer:coarse)").matches;
+const WORLD_ZOOM = touchEnabled ? 1.3 : 1;   // no celular, aproxima a câmera (Lula maior)
 
 /* ----------------------------- Áudio / Música --------------------------- */
 let actx = null, musicOn = true, musicTimer = null, musicStep = 0;
@@ -463,9 +464,10 @@ function checkCoins() {
   }
 }
 function updateCamera() {
-  const target = player.x + player.w/2 - VIEW_W*0.4;
+  const vw = VIEW_W / WORLD_ZOOM;              // largura visível (considera o zoom do mobile)
+  const target = player.x + player.w/2 - vw*0.4;
   cam.x += (target - cam.x) * 0.12;
-  cam.x = clamp(cam.x, 0, Math.max(0, levelPxW - VIEW_W));
+  cam.x = clamp(cam.x, 0, Math.max(0, levelPxW - vw));
 }
 function updateHints() {
   if (!hints.length) return;
@@ -709,12 +711,15 @@ function render() {
   }
   // cenas de jogo (play/pause/feito/fase/over/win) desenham a fase
   const def = LEVELS[levelIndex] || LEVELS[0];
+  ctx.save();
+  if (WORLD_ZOOM !== 1){ ctx.translate(0, -VIEW_H*(WORLD_ZOOM-1)); ctx.scale(WORLD_ZOOM, WORLD_ZOOM); } // zoom (mobile) ancorado no chão
   drawSky(def); drawScenery(def);
   ctx.save(); ctx.translate(-Math.round(cam.x), 0);
   drawTiles(); drawHazards(); drawCoins();
   drawEnemies(); if (boss && boss.alive && bossActive) drawBoss();
   if (player) drawPlayer();
   drawParticles();
+  ctx.restore();
   ctx.restore();
 }
 
