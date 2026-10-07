@@ -32,7 +32,7 @@ const Scene = { MENU:"menu", INTRO:"intro", CHAR:"char", MAP:"map", MISSAO:"miss
 let scene = Scene.MENU;
 
 /* ----------------------------- Progresso -------------------------------- */
-let heroId = "lula";
+let heroId = "militante";
 let completed = 0;                 // nº de fases concluídas (desbloqueia a próxima)
 let levelIndex = 0;
 let introStep = 0;
@@ -166,6 +166,7 @@ function loadLevel(idx) {
         case "P": startPos = { x: px + 10, y: py - 4 }; gridRow.push(" "); break;
         case "o": coins.push({ x: px+TS/2, y: py+TS/2, taken:false, phase:Math.random()*6.28 }); gridRow.push(" "); break;
         case "E": enemies.push(makeEnemy(px+9, py+10)); gridRow.push(" "); break;
+        case "N": enemies.push(makeEnemy(px+9, py+10, true)); gridRow.push(" "); break;
         case "w": hazards.push({ x:px+4, y:py+TS-22, w:TS-8, h:22, phase:Math.random()*6.28 }); gridRow.push(" "); break;
         case "X":
           boss = { x:px, y:py-TS, w:TS*1.6, h:TS*1.75, vx:ENEMY_SPD*0.9, vy:0,
@@ -177,6 +178,9 @@ function loadLevel(idx) {
     }
     grid.push(gridRow);
   }
+
+  // inimigos "fake news" voadores (posições em [coluna, linha])
+  (def.flyers || []).forEach(([c, r]) => enemies.push(makeEnemy(c*TS+9, r*TS+10, true)));
 
   // tutorial
   hints = [];
@@ -199,15 +203,16 @@ function loadLevel(idx) {
   updateHUD();
 }
 
-function makeEnemy(x, y) {
-  return { x, y, w: TS-18, h: TS-14, vx: -ENEMY_SPD, vy:0, alive:true, onGround:false, t:Math.random()*60, sx:x, sy:y };
+function makeEnemy(x, y, flying) {
+  return { x, y, w: TS-18, h: TS-14, vx: -ENEMY_SPD, vy:0, alive:true, onGround:false,
+           t:Math.random()*60, sx:x, sy:y, flying:!!flying, baseY:y, range:5*TS };
 }
 
 function resetPlayerAndEnemies() {
   const hero = HEROIS.find((h) => h.id === heroId) || HEROIS[0];
   player = { x:startPos.x, y:startPos.y, w:40, h:56, vx:0, vy:0, onGround:false,
              facing:1, t:0, invuln:0, alive:true,
-             jumpMul:hero.jump, speedMul:hero.speed, sprite:hero.sprite };
+             jumpMul:hero.jump, speedMul:hero.speed, skin:hero.skin };
   enemies.forEach((e) => { e.x=e.sx; e.y=e.sy; e.vx=-ENEMY_SPD; e.vy=0; e.alive=true; });
   if (boss) { boss.x=boss.sx; boss.y=boss.sy; boss.hp=boss.maxhp; boss.alive=true; boss.vx=ENEMY_SPD*0.9; boss.vy=0; boss.invuln=0; }
   bossActive = false; bossDefeated = false;
@@ -315,12 +320,20 @@ function update() {
 function updateEnemies() {
   enemies.forEach((e) => {
     if (!e.alive) return;
-    e.vy += GRAVITY; if (e.vy>MAX_FALL) e.vy=MAX_FALL;
-    enemyMove(e, ENEMY_SPD);
+    if (e.flying) {
+      e.x += e.vx;
+      if (e.x < e.sx - e.range || e.x > e.sx + e.range) e.vx = -e.vx;
+      const cc = Math.floor((e.x + (e.vx>0?e.w:0))/TS), cr = Math.floor((e.y+e.h/2)/TS);
+      if (isSolidCell(cc, cr)) e.vx = -e.vx;
+      e.y = e.baseY + Math.sin(e.t*0.12)*10;
+    } else {
+      e.vy += GRAVITY; if (e.vy>MAX_FALL) e.vy=MAX_FALL;
+      enemyMove(e, ENEMY_SPD);
+    }
     if (player.invuln===0 && deathTimer===0 && aabb(player, e)) {
       if (player.vy>1.5 && (player.y+player.h)-e.y < 26) {
         e.alive=false; player.vy=STOMP_VY;
-        spawnParticles(e.x+e.w/2, e.y+e.h/2, "#9a86b0", 12); sfx("stomp");
+        spawnParticles(e.x+e.w/2, e.y+e.h/2, e.flying?"#e9e9ef":"#9a86b0", 12); sfx("stomp");
       } else hurt();
     }
   });
@@ -455,9 +468,14 @@ function processDeedQueue() {
 function faseClear() {
   if (completed < levelIndex + 1) completed = levelIndex + 1;
   const last = levelIndex >= LEVELS.length - 1;
-  document.getElementById("fase-titulo").textContent = LEVELS[levelIndex].nome + " ✅";
+  const def = LEVELS[levelIndex];
+  const policies = CONQUISTAS[def.chefe].map((c)=>`${c.emoji} ${c.nome}`).join("<br>");
+  const skills = (def.skills||[]).join("<br>");
+  document.getElementById("fase-titulo").textContent = def.nome + " ✅";
   document.getElementById("fase-stats").innerHTML =
-    `🗳️ Votos: <b>${votos}</b><br>⭐ Conquistas: <b>${collectedDeeds.length}/${totalDeeds}</b>`;
+    `<div class="fc-sec"><span class="fc-h">🏆 Conquistado neste mapa</span>${policies}</div>` +
+    `<div class="fc-sec"><span class="fc-h">📈 O que melhorou no Brasil</span>${skills}</div>` +
+    `<div class="fc-votos">🗳️ Votos: <b>${votos}</b> &nbsp;·&nbsp; ⭐ Total: <b>${collectedDeeds.length}/${totalDeeds}</b></div>`;
   document.getElementById("btn-next").textContent = last ? "Grande final 🎉" : "Ir para o mapa ▶";
   showScene(Scene.FASE);
 }
@@ -536,7 +554,8 @@ function primaryAction() {
 /* ----------------------------- Intro ------------------------------------ */
 function renderIntroSlide() {
   const s = HISTORIA[introStep];
-  const artEmoji = { brasil:"🇧🇷", forcas:"👔", conquista:"⭐", vamos:"🚀" }[s.art] || "🇧🇷";
+  const artEmoji = { brasil:"🇧🇷", crianca:"👦", trabalho:"🔧", sindicato:"✊",
+                     presidente:"🎖️", vamos:"🚀" }[s.art] || "🇧🇷";
   document.getElementById("intro-art").textContent = artEmoji;
   document.getElementById("intro-titulo").textContent = s.titulo;
   document.getElementById("intro-texto").textContent = s.texto;
@@ -550,7 +569,7 @@ function introNext() {
 }
 
 /* ----------------------------- Seleção de personagem -------------------- */
-let selectedChar = "lula";
+let selectedChar = "militante";
 function buildCharCards() {
   const list = document.getElementById("char-list"); list.innerHTML = "";
   HEROIS.forEach((h) => {
@@ -558,7 +577,7 @@ function buildCharCards() {
     card.className = "char-card" + (h.id===selectedChar?" sel":"");
     const cv = document.createElement("canvas"); cv.width=72*2; cv.height=88*2;
     const cc = cv.getContext("2d"); cc.scale(2,2);
-    drawHero(cc, 36, 10, 68, h.sprite, 1, "idle", 0);
+    drawHero(cc, 36, 10, 68, h.skin, 1, "idle", 0);
     card.appendChild(cv);
     const nm = document.createElement("div"); nm.className="cn"; nm.textContent=h.nome; card.appendChild(nm);
     const ds = document.createElement("div"); ds.className="cd"; ds.textContent=h.desc; card.appendChild(ds);
@@ -771,8 +790,31 @@ function drawCoins(){
 function drawEnemies(){
   for(const e of enemies){
     if(!e.alive)continue; if(e.x+e.w<cam.x-40||e.x>cam.x+VIEW_W+40)continue;
-    drawVilao(e.x,e.y,e.w,e.h,e.vx,e.t);
+    if(e.flying) drawFakeNews(e.x,e.y,e.w,e.h,e.t);
+    else drawVilao(e.x,e.y,e.w,e.h,e.vx,e.t);
   }
+}
+/* Inimigo "fake news": um jornalzinho/telinha mentirosa que voa */
+function drawFakeNews(x,y,w,h,t){
+  const cx=x+w/2, cy=y+h/2;
+  // asas batendo
+  const flap=Math.max(1.5, 4+Math.sin(t*0.4)*4);
+  ctx.fillStyle="rgba(255,255,255,.85)";
+  ctx.beginPath(); ctx.ellipse(x-4,cy-2,8,flap,-0.4,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x+w+4,cy-2,8,flap,0.4,0,7); ctx.fill();
+  // "jornal" branco
+  ctx.fillStyle="#f3f3ee"; roundRect(ctx,x,y,w,h,4); ctx.fill();
+  ctx.strokeStyle="#c9c9c0"; ctx.lineWidth=1.5; roundRect(ctx,x+1,y+1,w-2,h-2,4); ctx.stroke(); ctx.lineWidth=1;
+  // tarja vermelha "FAKE"
+  ctx.fillStyle="#d11a2a"; ctx.fillRect(x+3,y+5,w-6,10);
+  ctx.fillStyle="#fff"; ctx.font="bold 9px 'Baloo 2',sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText("FAKE", cx, y+10);
+  // linhas de "texto" mentiroso
+  ctx.fillStyle="#b9b9b0";
+  for(let i=0;i<3;i++) ctx.fillRect(x+5, y+20+i*6, w-10-((i*7)%10), 3);
+  // olhinhos raivosos
+  ctx.fillStyle="#15161a";
+  ctx.fillRect(cx-7, y+h-9, 4, 4); ctx.fillRect(cx+3, y+h-9, 4, 4);
 }
 /* Vilão = "político do atraso": caricatura genérica de terno e gravata.
    Não representa pessoa real. */
@@ -845,60 +887,99 @@ function drawPlayer(){
   if(p.invuln>0 && Math.floor(p.t/4)%2===0 && deathTimer===0 && levelClearTimer===0) return;
   const walking=p.onGround && Math.abs(p.vx)>0.4;
   const swing=walking?Math.sin(p.t*0.3):0;
-  drawHero(ctx, p.x+p.w/2, p.y, p.h, p.sprite, p.facing, p.onGround?(walking?"walk":"idle"):"jump", swing);
+  drawHero(ctx, p.x+p.w/2, p.y, p.h, p.skin, p.facing, p.onGround?(walking?"walk":"idle"):"jump", swing);
 }
-/* desenha um herói. cx = centro X, topY = topo, H = altura total */
-function drawHero(c, cx, topY, H, sprite, facing, state, swing){
-  const W=H*0.72, x=cx-W/2, y=topY;
-  const airborne=(state==="jump");
+/* Desenha o Lula. skin: 'red' (camiseta+boné), 'suit' (terno), 'hat' (chapéu).
+   cx = centro X, topY = topo, H = altura total. */
+function drawHero(c, cx, topY, H, skin, facing, state, swing){
+  const W=H*0.76, y=topY, air=(state==="jump");
+  const skinC="#e3ac81", skinD="#cf9568";
+  let shirt="#e11021", shirtD="#b60d1a", pants="#27407d", bare=true, hat="cap";
+  if(skin==="suit"){ shirt="#71767f"; shirtD="#585d67"; pants="#565b65"; bare=false; hat=null; }
+  if(skin==="hat"){  shirt="#f2eee2"; shirtD="#d9d3c2"; pants="#c7bb9c"; bare=false; hat="panama"; }
+
   c.save();
   c.translate(cx,y); c.scale(facing,1); c.translate(-cx,-y);
+
   // sombra
   c.fillStyle="rgba(0,0,0,.18)"; c.beginPath(); c.ellipse(cx,y+H,W*0.5,6,0,0,7); c.fill();
 
-  // paleta por personagem
-  let shirt="#e11021", pants="#213a7a", skin="#e8b48a", hair="#d9d9de";
-  if(sprite==="prof"){ shirt="#1f9d55"; pants="#5a3a86"; hair="#5a3a22"; }
-  if(sprite==="trab"){ shirt="#1b6fae"; pants="#2a2a30"; hair="#3a2a1a"; }
-
-  const legY=y+H-H*0.28;
   // pernas
+  const legTop=y+H*0.63, legH=H*0.31, lw=W*0.2;
   c.fillStyle=pants;
-  if(airborne){ c.fillRect(cx-W*0.28,legY,W*0.22,H*0.26); c.fillRect(cx+W*0.06,legY-H*0.05,W*0.22,H*0.26); }
-  else { c.fillRect(cx-W*0.28,legY,W*0.22,H*0.25+swing*3); c.fillRect(cx+W*0.06,legY,W*0.22,H*0.25-swing*3); }
+  if(air){ c.fillRect(cx-W*0.24,legTop,lw,legH*0.85); c.fillRect(cx+W*0.05,legTop-H*0.04,lw,legH*0.85); }
+  else { c.fillRect(cx-W*0.24,legTop,lw,legH-swing*3); c.fillRect(cx+W*0.05,legTop,lw,legH+swing*3); }
   // sapatos
-  c.fillStyle="#15161a"; c.fillRect(cx-W*0.3,y+H-5,W*0.26,6); c.fillRect(cx+W*0.04,y+H-5,W*0.26,6);
+  c.fillStyle="#1a1a1f";
+  c.fillRect(cx-W*0.27,y+H-H*0.08,lw+W*0.05,H*0.08);
+  c.fillRect(cx+W*0.03,y+H-H*0.08,lw+W*0.05,H*0.08);
+
   // tronco
-  c.fillStyle=shirt; roundRect(c,cx-W*0.34,y+H*0.28,W*0.68,H*0.4,8); c.fill();
-  c.fillStyle=shade(shirt,-.12); c.fillRect(cx-W*0.34,y+H*0.28,W*0.68,7);
-  // braços
-  c.fillStyle=shade(shirt,-.06);
-  if(airborne){ c.fillRect(cx-W*0.46,y+H*0.26,W*0.16,H*0.28); c.fillRect(cx+W*0.3,y+H*0.22,W*0.16,H*0.28); }
-  else { c.fillRect(cx-W*0.46,y+H*0.32,W*0.16,H*0.26-swing*3); c.fillRect(cx+W*0.3,y+H*0.32,W*0.16,H*0.26+swing*3); }
-  c.fillStyle=skin;
-  c.fillRect(cx-W*0.46,y+H*0.56-(airborne?H*0.04:swing*3),W*0.16,H*0.08);
-  c.fillRect(cx+W*0.3,y+H*0.56+(airborne?0:swing*3),W*0.16,H*0.08);
-  // cabeça
-  const hx=cx, hy=y+H*0.02, hw=W*0.5, hh=H*0.3;
-  c.fillStyle=skin; roundRect(c,hx-hw/2,hy,hw,hh,hw*0.35); c.fill();
-  // cabelo/estilo por personagem
-  if(sprite==="lula"){
-    c.fillStyle=hair; c.beginPath(); c.arc(hx,hy+hh*0.28,hw*0.52,Math.PI,0); c.fill();
-    c.fillStyle=hair; c.beginPath(); // barba
-    c.moveTo(hx-hw*0.5,hy+hh*0.45); c.quadraticCurveTo(hx,hy+hh*1.15,hx+hw*0.5,hy+hh*0.45);
-    c.lineTo(hx+hw*0.5,hy+hh*0.62); c.quadraticCurveTo(hx,hy+hh*0.95,hx-hw*0.5,hy+hh*0.62); c.closePath(); c.fill();
-  } else if(sprite==="prof"){
-    c.fillStyle=hair; c.beginPath(); c.arc(hx,hy+hh*0.3,hw*0.55,Math.PI,0); c.fill();
-    c.beginPath(); c.arc(hx+hw*0.42,hy+hh*0.1,hw*0.24,0,7); c.fill(); // coque
-    c.strokeStyle="#333"; c.lineWidth=2; c.beginPath(); c.arc(hx+hw*0.12,hy+hh*0.5,hw*0.14,0,7); c.stroke(); c.lineWidth=1; // óculos
-  } else {
-    c.fillStyle=hair; c.beginPath(); c.arc(hx,hy+hh*0.35,hw*0.5,Math.PI,0); c.fill();
-    c.fillStyle="#f2c230"; c.fillRect(hx-hw*0.56,hy+hh*0.02,hw*1.12,hh*0.22); // capacete
-    c.beginPath(); c.arc(hx,hy+hh*0.06,hw*0.56,Math.PI,0); c.fill();
+  const tY=y+H*0.3, tH=H*0.37, tW=W*0.62;
+  c.fillStyle=shirt; roundRect(c,cx-tW/2,tY,tW,tH,6); c.fill();
+  c.fillStyle=shirtD; roundRect(c,cx-tW/2,tY+tH*0.55,tW,tH*0.45,6); c.fill();
+
+  // braços (manga + antebraço + mão)
+  const aUp=H*0.17, aLo=H*0.14, aw=W*0.14, upY=tY+2;
+  for(const side of [-1,1]){
+    const ax = side<0 ? cx-tW/2-aw+2 : cx+tW/2-2;
+    const sgn = air ? (side<0?1:-1)*0.5 : (side<0?-swing:swing);
+    c.fillStyle=shirt; c.fillRect(ax,upY,aw,aUp);
+    c.fillStyle=bare?skinC:shirt; c.fillRect(ax,upY+aUp,aw,aLo+sgn*3);
+    c.fillStyle=skinC; c.fillRect(ax,upY+aUp+aLo+sgn*3,aw,H*0.055);
   }
-  // rosto
-  c.fillStyle="#15161a"; c.fillRect(hx+hw*0.12,hy+hh*0.42,3,4);
-  c.strokeStyle="#8a5a33"; c.lineWidth=2; c.beginPath(); c.arc(hx+hw*0.08,hy+hh*0.62,4,0.1,Math.PI-0.6); c.stroke(); c.lineWidth=1;
+
+  // detalhes da roupa
+  if(skin==="suit"){
+    c.fillStyle="#f4f4f0"; c.beginPath(); c.moveTo(cx-tW*0.17,tY); c.lineTo(cx,tY+tH*0.48); c.lineTo(cx+tW*0.17,tY); c.closePath(); c.fill();
+    c.fillStyle=shirtD;
+    c.beginPath(); c.moveTo(cx-tW*0.2,tY); c.lineTo(cx-tW*0.01,tY+tH*0.3); c.lineTo(cx-tW*0.01,tY); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(cx+tW*0.2,tY); c.lineTo(cx+tW*0.01,tY+tH*0.3); c.lineTo(cx+tW*0.01,tY); c.closePath(); c.fill();
+    c.fillStyle="#d11a2a"; c.beginPath(); c.moveTo(cx-3,tY+tH*0.05); c.lineTo(cx+3,tY+tH*0.05); c.lineTo(cx+5,tY+tH*0.5); c.lineTo(cx,tY+tH*0.57); c.lineTo(cx-5,tY+tH*0.5); c.closePath(); c.fill();
+  } else if(skin==="hat"){
+    c.fillStyle=shirtD; c.beginPath(); c.moveTo(cx-tW*0.15,tY); c.lineTo(cx,tY+tH*0.18); c.lineTo(cx+tW*0.15,tY); c.closePath(); c.fill();
+    c.fillStyle="#cfc8b4"; for(let i=0;i<3;i++) c.fillRect(cx-1,tY+tH*0.26+i*tH*0.18,2,4);
+  } else {
+    c.fillStyle=shirtD; c.beginPath(); c.ellipse(cx,tY+2,tW*0.17,4,0,0,7); c.fill();
+  }
+
+  // cabeça
+  const hw=W*0.52, hh=H*0.3, hx=cx, hy=y+H*0.01;
+  c.fillStyle=skinC; c.beginPath(); c.arc(hx+hw*0.45,hy+hh*0.56,hw*0.13,0,7); c.fill(); // orelha
+  c.fillStyle=skinC; roundRect(c,hx-hw/2,hy+hh*0.06,hw,hh*0.94,hw*0.32); c.fill();
+  c.fillStyle=skinD; roundRect(c,hx-hw/2,hy+hh*0.06,hw*0.26,hh*0.94,hw*0.32); c.fill(); // sombra lateral
+  // cabelo grisalho
+  c.fillStyle="#d8d8dd";
+  c.beginPath(); c.arc(hx,hy+hh*0.3,hw*0.55,Math.PI,0); c.fill();
+  c.fillRect(hx-hw*0.55,hy+hh*0.3,hw*0.12,hh*0.42); c.fillRect(hx+hw*0.43,hy+hh*0.3,hw*0.12,hh*0.36);
+  // barba + bigode grisalhos
+  c.fillStyle="#d3d3d9";
+  c.beginPath(); c.moveTo(hx-hw*0.46,hy+hh*0.52); c.quadraticCurveTo(hx,hy+hh*1.14,hx+hw*0.46,hy+hh*0.52);
+  c.lineTo(hx+hw*0.46,hy+hh*0.64); c.quadraticCurveTo(hx,hy+hh*0.96,hx-hw*0.46,hy+hh*0.64); c.closePath(); c.fill();
+  c.fillRect(hx-hw*0.24,hy+hh*0.56,hw*0.48,hh*0.08); // bigode
+  // olhos
+  c.fillStyle="#fff"; c.beginPath(); c.arc(hx-hw*0.16,hy+hh*0.45,hw*0.1,0,7); c.arc(hx+hw*0.16,hy+hh*0.45,hw*0.1,0,7); c.fill();
+  c.fillStyle="#2a2320"; c.beginPath(); c.arc(hx-hw*0.13,hy+hh*0.46,hw*0.05,0,7); c.arc(hx+hw*0.19,hy+hh*0.46,hw*0.05,0,7); c.fill();
+  // sobrancelhas
+  c.strokeStyle="#cfcfd4"; c.lineWidth=2.5;
+  c.beginPath(); c.moveTo(hx-hw*0.27,hy+hh*0.34); c.lineTo(hx-hw*0.05,hy+hh*0.37);
+  c.moveTo(hx+hw*0.05,hy+hh*0.37); c.lineTo(hx+hw*0.27,hy+hh*0.34); c.stroke();
+  // sorriso
+  c.strokeStyle="#9a6a46"; c.lineWidth=2; c.beginPath(); c.arc(hx,hy+hh*0.72,hw*0.15,0.2,Math.PI-0.2); c.stroke(); c.lineWidth=1;
+
+  // chapéu / boné
+  if(hat==="cap"){
+    c.fillStyle="#e11021"; c.beginPath(); c.arc(hx,hy+hh*0.26,hw*0.57,Math.PI,0); c.fill();
+    c.fillRect(hx-hw*0.57,hy+hh*0.22,hw*1.14,hh*0.1);
+    c.fillStyle="#b60d1a"; c.beginPath(); c.ellipse(hx+hw*0.42,hy+hh*0.3,hw*0.5,hh*0.11,0,0,Math.PI); c.fill();
+    c.fillStyle="#fff"; c.beginPath(); c.arc(hx,hy+hh*0.06,hw*0.07,0,7); c.fill();
+  } else if(hat==="panama"){
+    c.fillStyle="#f0e5c2"; c.beginPath(); c.ellipse(hx,hy+hh*0.28,hw*0.74,hh*0.13,0,0,7); c.fill();
+    c.fillStyle="#f5ecce"; c.beginPath(); c.ellipse(hx,hy+hh*0.12,hw*0.44,hh*0.22,0,Math.PI,0); c.fill();
+    c.fillRect(hx-hw*0.44,hy+hh*0.1,hw*0.88,hh*0.14);
+    c.fillStyle="#3a3a40"; c.fillRect(hx-hw*0.44,hy+hh*0.2,hw*0.88,hh*0.05);
+  }
+
   c.restore();
 }
 

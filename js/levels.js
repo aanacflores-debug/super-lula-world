@@ -2,43 +2,46 @@
  * SUPER LULA WORLD — dados do jogo (JOGO EDUCATIVO)
  * Objetivo: ensinar, de forma lúdica, políticas e conquistas do governo Lula.
  *
- * TOM: tributo positivo e didático.
- *  - Os VILÕES são "políticos do atraso": caricaturas GENÉRICAS (terno e
- *    gravata), não representam pessoas reais.
- *  - Os CHEFÕES são os grandes PROBLEMAS que o povo enfrentava
- *    (A Fome, O Desmonte, A Desigualdade, A Ameaça à Democracia).
- *  - Ao vencer o chefão, o jogador DESBLOQUEIA e APRENDE sobre as conquistas.
+ * ESTRUTURA NARRATIVA
+ *  - INTRO: a história do Lula (do sertão à presidência).
+ *  - Cada MAPA tem um tema/era e um CHEFÃO (um grande problema do país).
+ *  - Os blocos '?' explicam, durante a fase, as POLÍTICAS daquele mapa
+ *    (você vai "conquistando" cada uma).
+ *  - Ao fim do mapa: recap do que foi conquistado + o que melhorou no Brasil.
+ *
+ * TOM: tributo positivo e didático. Vilões = "políticos do atraso"
+ * (caricaturas genéricas) e, no fim, a desinformação/fake news e a ameaça
+ * à soberania — nunca pessoas reais específicas.
  * ==========================================================================*/
 
 /* ------------------------------- HISTÓRIA (intro) ----------------------- */
 const HISTORIA = [
-  {
-    titulo: "Um Brasil para reconstruir",
-    texto: "Por anos, a fome voltou a crescer, direitos foram desmontados e muita gente ficou para trás. Este jogo conta, fase por fase, como o país começou a ser reconstruído.",
-    art: "brasil"
-  },
-  {
-    titulo: "Quem atrapalha o povo",
-    texto: "No caminho estão os 'políticos do atraso' e os grandes problemas que eles alimentam: a fome, o desmonte dos serviços públicos, a desigualdade e as ameaças à democracia.",
-    art: "forcas"
-  },
-  {
-    titulo: "Cada vitória ensina uma conquista",
-    texto: "Ao vencer o chefão de cada fase, você descobre uma política real que mudou vidas: Bolsa Família, Farmácia Popular, Minha Casa Minha Vida, Mais Médicos e muito mais.",
-    art: "conquista"
-  },
-  {
-    titulo: "Bora aprender jogando!",
-    texto: "Escolha quem vai liderar a caminhada, siga pelo mapa do Brasil e reconstrua o país. Cada fase deixa uma lição. Vamos juntos! 🇧🇷",
-    art: "vamos"
-  }
+  { titulo: "O Brasil que precisava mudar",
+    texto: "Fome, desigualdade e direitos ameaçados. Esta é a história de como o povo começou a virar esse jogo.",
+    art: "brasil" },
+  { titulo: "Um menino do sertão",
+    texto: "Lula nasceu em 1945, em Caetés (PE). Criança ainda, migrou de pau-de-arara para São Paulo, fugindo da seca.",
+    art: "crianca" },
+  { titulo: "O trabalhador",
+    texto: "Foi engraxate e vendedor ambulante. Virou torneiro mecânico — e perdeu um dedo num acidente de trabalho.",
+    art: "trabalho" },
+  { titulo: "A voz do povo",
+    texto: "Líder dos metalúrgicos do ABC, comandou grandes greves e ajudou a fundar a CUT e o Partido dos Trabalhadores.",
+    art: "sindicato" },
+  { titulo: "O presidente",
+    texto: "Depois de concorrer três vezes, foi eleito presidente em 2002 e começou a reconstruir o país.",
+    art: "presidente" },
+  { titulo: "Sua missão",
+    texto: "Atravesse o Brasil, conquiste as políticas que mudaram vidas e melhore as áreas do país. Vamos juntos! 🇧🇷",
+    art: "vamos" }
 ];
 
-/* ------------------------------- PERSONAGENS ---------------------------- */
+/* ------------------------------- SKINS DO LULA -------------------------- */
+/* Só o Lula, em três visuais. Mesma jogabilidade (cosmético). */
 const HEROIS = [
-  { id: "lula", nome: "Lula",          desc: "Equilibrado — bom em tudo",  jump: 1.0,  speed: 1.0,  sprite: "lula" },
-  { id: "prof", nome: "A Professora",  desc: "Pula mais alto",             jump: 1.12, speed: 0.97, sprite: "prof" },
-  { id: "trab", nome: "O Trabalhador", desc: "Corre mais rápido",          jump: 1.0,  speed: 1.12, sprite: "trab" }
+  { id: "militante",  nome: "Lula Militante",  desc: "Camiseta e boné vermelhos", jump: 1.0, speed: 1.0, skin: "red" },
+  { id: "presidente", nome: "Lula Presidente", desc: "Terno cinza",               jump: 1.0, speed: 1.0, skin: "suit" },
+  { id: "povo",       nome: "Lula do Povo",    desc: "Camisa branca e chapéu",    jump: 1.0, speed: 1.0, skin: "hat" }
 ];
 
 /* ------------------------------- CONQUISTAS (conteúdo educativo) -------- */
@@ -48,40 +51,37 @@ const CONQUISTAS = {
       texto: "Conjunto de ações contra a fome lançado em 2003. Ajudou o Brasil a sair, em 2014, do Mapa da Fome da ONU.",
       sabia: "Você sabia? Em 2025 o Brasil voltou a sair do Mapa da Fome da ONU." },
     { nome: "Bolsa Família", emoji: "🧡",
-      texto: "Programa de transferência de renda que apoia milhões de famílias e exige que as crianças estejam na escola e com vacinas em dia.",
-      sabia: "Além de combater a pobreza, o dinheiro move o comércio das cidades pequenas." }
+      texto: "Transferência de renda que apoia milhões de famílias e exige crianças na escola e vacinas em dia.",
+      sabia: "O dinheiro também move o comércio das cidades pequenas." }
   ],
   desmonte: [
     { nome: "Farmácia Popular", emoji: "💊",
-      texto: "Dá acesso a remédios de graça ou com grande desconto, em farmácias de todo o país. Foi retomado e ampliado.",
+      texto: "Acesso a remédios de graça ou com grande desconto, em farmácias de todo o país.",
       sabia: "Atende tratamentos como pressão alta, diabetes e asma." },
     { nome: "Mais Médicos", emoji: "🩺",
-      texto: "Leva médicos a cidades do interior e periferias que tinham dificuldade de atrair profissionais de saúde.",
-      sabia: "Milhões de pessoas passaram a ter atendimento perto de casa." }
+      texto: "Leva médicos a cidades do interior e periferias que não conseguiam atrair profissionais.",
+      sabia: "Milhões passaram a ter atendimento perto de casa." }
   ],
   desigualdade: [
     { nome: "Salário mínimo acima da inflação", emoji: "💪",
-      texto: "Política de valorização do salário mínimo com ganho real — ou seja, acima da inflação.",
-      sabia: "Como aposentadorias seguem o mínimo, milhões de idosos também ganham." },
+      texto: "Valorização do mínimo com ganho real — acima da inflação.",
+      sabia: "Como a aposentadoria segue o mínimo, os idosos também ganham." },
     { nome: "Minha Casa, Minha Vida", emoji: "🏠",
-      texto: "Programa habitacional que financia e constrói moradias para famílias conquistarem a casa própria.",
+      texto: "Financia e constrói moradias para famílias conquistarem a casa própria.",
       sabia: "Reduz o aluguel pesando no orçamento e gera muitos empregos." },
     { nome: "Valorização do trabalho", emoji: "🗓️",
-      texto: "Defesa de melhores condições e direitos para quem trabalha, como o debate sobre o fim da escala 6x1.",
+      texto: "Defesa de direitos e melhores condições, como o debate sobre o fim da escala 6x1.",
       sabia: "Trabalho digno é descanso, saúde e tempo com a família." }
   ],
   democracia: [
     { nome: "ProUni e novas universidades", emoji: "🎓",
-      texto: "Bolsas de estudo no ensino superior e a criação de novas universidades e institutos federais pelo país.",
-      sabia: "Filhos de trabalhadores passaram a ser os primeiros da família na faculdade." },
+      texto: "Bolsas no ensino superior e a criação de universidades e institutos federais pelo país.",
+      sabia: "Filhos de trabalhadores viraram os primeiros da família na faculdade." },
     { nome: "Luz para Todos", emoji: "💡",
-      texto: "Levou energia elétrica a milhões de pessoas no campo e em regiões isoladas do Brasil.",
-      sabia: "Luz em casa significa estudo à noite, geladeira e mais dignidade." },
-    { nome: "Proteção às famílias", emoji: "🛡️",
-      texto: "Ações por direitos e segurança, como o pacote antifeminicídio e a proteção de crianças e adolescentes.",
-      sabia: "Políticas públicas protegem quem mais precisa." },
+      texto: "Levou energia elétrica a milhões de pessoas no campo e em regiões isoladas.",
+      sabia: "Luz em casa é estudo à noite, geladeira e dignidade." },
     { nome: "Soberania e Democracia", emoji: "🇧🇷",
-      texto: "Defesa do Brasil, das instituições e do direito do povo de escolher livremente seu futuro.",
+      texto: "Defesa do Brasil, das instituições e do direito do povo de escolher seu futuro — contra a desinformação e a ingerência estrangeira.",
       sabia: "Democracia é o povo decidindo — e é preciso defendê-la todo dia." }
   ]
 };
@@ -91,31 +91,28 @@ const CHEFES = {
   fome:         { nome: "A FOME",                emoji: "🍽️", cor: "#6b4a2a", hp: 3 },
   desmonte:     { nome: "O DESMONTE",            emoji: "🏚️", cor: "#5a6472", hp: 3 },
   desigualdade: { nome: "A DESIGUALDADE",        emoji: "⚖️", cor: "#7a5a86", hp: 4 },
-  democracia:   { nome: "A AMEAÇA À DEMOCRACIA", emoji: "⚡", cor: "#8a2b2b", hp: 4 }
+  democracia:   { nome: "A AMEAÇA À DEMOCRACIA", emoji: "📢", cor: "#8a2b2b", hp: 4 }
 };
 
 /* ------------------------------- LEGENDA DOS MAPAS ----------------------
  *  ' ' vazio   'G' chão   'B' bloco   '=' plataforma
- *  '?' bloco surpresa (solta voto, bater de baixo)   'o' voto (moeda)
- *  'E' político do atraso (inimigo)   'X' chefão   'P' início
- *  Espaços vazios na linha do chão (última linha) = BURACO (pule!).
- *  Regras de alcance: '?' ficam a <= 2 tiles de uma superfície; plataformas
- *  '=' ficam na linha 8 (alcançáveis do chão). Tudo é alcançável.
+ *  '?' bloco surpresa (conta uma política)   'o' voto
+ *  'E' político do atraso   'X' chefão   'P' início
+ *  Espaços na linha do chão = BURACO.   flyers = inimigos "fake news" (voam).
  * ----------------------------------------------------------------------- */
 const LEVELS = [
   {
     nome: "Fase 1 — A Luta Contra a Fome",
-    missao: "No sertão, muita gente passava fome. Pule os buracos, desvie dos políticos do atraso e derrote A FOME para garantir comida na mesa do povo.",
+    missao: "2003. O país recomeça pelo mais urgente: ninguém pode passar fome. Atravesse o sertão, derrote A FOME e leve comida à mesa do povo.",
     chefe: "fome", cenario: "sertao",
     corCeu1: "#ff9a3d", corCeu2: "#ffe0a8", tutorial: true,
     fatos: [
-      "O Lula nasceu em 1945, em Caetés, no sertão de Pernambuco.",
-      "Criança ainda, migrou de pau-de-arara com a família para São Paulo, fugindo da seca.",
-      "Pobre, foi engraxate e vendedor ambulante antes de virar torneiro mecânico.",
-      "A fome que ele viu de perto virou prioridade: em 2003 nasceu o Fome Zero.",
-      "Comer todo dia é um direito — o Bolsa Família ajuda milhões de famílias a garantir isso.",
-      "Em 2014 o Brasil saiu do Mapa da Fome da ONU pela primeira vez."
+      "Você está conquistando o FOME ZERO: um conjunto de ações para acabar com a fome no Brasil.",
+      "Com ele, o Brasil saiu do Mapa da Fome da ONU em 2014.",
+      "Você está conquistando o BOLSA FAMÍLIA: renda para milhões de famílias.",
+      "Para receber, as crianças precisam estar na escola e com as vacinas em dia."
     ],
+    skills: ["🍽️ Combate à fome ↑↑", "🧡 Renda das famílias ↑"],
     rows: [
       "                                                    ",
       "                                                    ",
@@ -132,17 +129,16 @@ const LEVELS = [
   },
   {
     nome: "Fase 2 — Saúde é Direito",
-    missao: "Sem remédio e sem médico, o povo adoecia. Vença O DESMONTE e reconstrua a saúde pública para todos.",
+    missao: "Com o povo alimentado, é hora de cuidar da saúde. Enfrente O DESMONTE e reconstrua o atendimento para todos.",
     chefe: "desmonte", cenario: "cidade",
     corCeu1: "#3d9bff", corCeu2: "#cfeaff", tutorial: false,
     fatos: [
-      "Num acidente de trabalho, o jovem Lula perdeu um dedo da mão esquerda.",
-      "Ele virou líder dos metalúrgicos do ABC e comandou grandes greves nos anos 1970.",
-      "Ajudou a fundar a CUT e o Partido dos Trabalhadores (PT).",
-      "Saúde é direito: o SUS atende todo mundo de graça.",
-      "O Mais Médicos levou atendimento a cidades que não tinham nenhum médico.",
-      "A Farmácia Popular dá remédios de graça ou com desconto em todo o país."
+      "Você está conquistando a FARMÁCIA POPULAR: remédios de graça ou baratos.",
+      "Ela atende tratamentos como pressão alta, diabetes e asma.",
+      "Você está conquistando o MAIS MÉDICOS: atendimento onde faltava médico.",
+      "Milhões de pessoas passaram a ter um médico perto de casa."
     ],
+    skills: ["🩺 Saúde pública ↑↑", "💊 Acesso a remédios ↑"],
     rows: [
       "                                                          ",
       "                                                          ",
@@ -159,17 +155,18 @@ const LEVELS = [
   },
   {
     nome: "Fase 3 — Trabalho e Dignidade",
-    missao: "Salário curto, aluguel caro e jornada sem fim. Derrote A DESIGUALDADE e devolva dignidade a quem trabalha.",
+    missao: "Agora, trabalho e moradia para viver com dignidade. Derrote A DESIGUALDADE e devolva o que é de direito a quem trabalha.",
     chefe: "desigualdade", cenario: "campo",
     corCeu1: "#2fb15a", corCeu2: "#d6f6dd", tutorial: false,
     fatos: [
-      "Lula concorreu à presidência em 1989, 1994 e 1998 antes de vencer.",
-      "Em 2002 foi eleito presidente pela primeira vez, com mais de 52 milhões de votos.",
-      "Valorizar o salário mínimo acima da inflação dá mais poder de compra ao povo.",
-      "Como a aposentadoria segue o salário mínimo, milhões de idosos também ganham.",
-      "O Minha Casa Minha Vida ajudou milhões de famílias a sair do aluguel.",
-      "Trabalho digno também é ter tempo para descansar e viver com a família."
+      "Você está conquistando o SALÁRIO MÍNIMO acima da inflação: mais poder de compra.",
+      "Como a aposentadoria segue o mínimo, os idosos também ganham.",
+      "Você está conquistando o MINHA CASA MINHA VIDA: a casa própria.",
+      "Menos aluguel pesando no bolso e muitos empregos gerados.",
+      "Você está conquistando a VALORIZAÇÃO DO TRABALHO: direitos e descanso.",
+      "Trabalho digno é ter tempo para a família."
     ],
+    skills: ["💪 Renda e salário ↑", "🏠 Moradia ↑", "🗓️ Direitos do trabalho ↑"],
     rows: [
       "                                                            ",
       "                                                            ",
@@ -186,17 +183,19 @@ const LEVELS = [
   },
   {
     nome: "Fase 4 — Democracia e Futuro",
-    missao: "A última batalha. Enfrente A AMEAÇA À DEMOCRACIA e garanta educação, energia e liberdade para o povo brasileiro.",
+    missao: "A última batalha. Entre a FAKE NEWS, os canais que desinformam e a ingerência estrangeira, defenda a educação, a energia e a DEMOCRACIA do Brasil.",
     chefe: "democracia", cenario: "capital",
     corCeu1: "#8e4bd1", corCeu2: "#ead6ff", tutorial: false,
     fatos: [
-      "Educação muda o país: o ProUni deu bolsas para filhos de trabalhadores na faculdade.",
-      "Foram criadas dezenas de novas universidades e institutos federais pelo Brasil.",
-      "O Luz para Todos levou energia elétrica a quem nunca tinha tido.",
-      "Energia em casa é estudo à noite, geladeira funcionando e mais dignidade.",
-      "Defender a soberania é cuidar do que é do Brasil e do seu povo.",
-      "Democracia é o povo decidindo seu futuro — e isso se defende todo dia."
+      "Você está conquistando o PROUNI: bolsas de faculdade para quem não podia pagar.",
+      "E novas universidades e institutos federais por todo o país.",
+      "Você está conquistando o LUZ PARA TODOS: energia elétrica para quem não tinha.",
+      "Luz em casa é estudo à noite e geladeira funcionando.",
+      "Você defende a DEMOCRACIA e a SOBERANIA contra a fake news.",
+      "Informação de verdade e independência: o Brasil decide o seu futuro."
     ],
+    skills: ["🎓 Educação ↑", "💡 Energia ↑", "🛡️ Democracia e soberania ↑"],
+    flyers: [[16,4],[30,3],[44,5],[53,4]],   // inimigos "fake news" (voam)
     rows: [
       "                                                              ",
       "                                                              ",
@@ -213,8 +212,7 @@ const LEVELS = [
   }
 ];
 
-/* -------- Mapa do Brasil: posição de cada fase por região (0..1) -------- */
-/* Fase 1 Nordeste (sertão) · Fase 2 Sudeste · Fase 3 Sul · Fase 4 Centro(Brasília) */
+/* -------- Mapa do Brasil: fases por longitude/latitude reais ------------ */
 const MAPA_NOS = [
   { lon: -40.3, lat:  -8.5 },   // Fase 1 — Nordeste (sertão, PE/BA)
   { lon: -46.6, lat: -22.5 },   // Fase 2 — Sudeste (São Paulo)

@@ -227,6 +227,9 @@ h2{
 }
 .feito-sabia:empty{display:none;}
 .fase-stats{font-size:clamp(14px,3vw,18px);color:#333;margin-bottom:18px;line-height:1.6;}
+.fc-sec{text-align:left;background:#fff;border:2px solid var(--preto);border-radius:12px;padding:8px 12px;margin:8px 0;font-size:clamp(13px,2.8vw,16px);line-height:1.5;}
+.fc-h{display:block;font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--vermelho);font-size:.95em;margin-bottom:3px;}
+.fc-votos{font-size:clamp(13px,2.8vw,16px);color:#444;margin-top:6px;}
 
 /* ---------------- Vitória ---------------- */
 .win-box{width:min(94%,560px);}
