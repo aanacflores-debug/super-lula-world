@@ -1282,7 +1282,7 @@ function drawMap(){
   const np = mapNodePx[curIdx];
   if (np) {
     const hero = HEROIS.find(h=>h.id===selectedChar) || HEROIS[0];
-    const hop = Math.abs(Math.sin(bgT*0.12))*6;
+    const hop = Math.abs(Math.sin(bgT*0.05))*6;
     drawHero(ctx, np.x, np.y - 30 - 54 - hop, 54, hero.skin, 1, "idle", 0, bgT);
   }
 }
