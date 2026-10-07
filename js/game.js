@@ -25,6 +25,20 @@ const DPR = Math.min(window.devicePixelRatio || 1, 2);
 canvas.width = VIEW_W * DPR;
 canvas.height = VIEW_H * DPR;
 
+/* Ajusta a "caixa" do jogo para caber EXATAMENTE na área visível do navegador
+   (mede window.innerHeight, que no iOS já desconta a barra do Safari e atualiza
+   quando a barra some/aparece). Mantém a proporção 1280:704 e centraliza. */
+function fitShell(){
+  const sh = document.getElementById("game-shell"); if(!sh) return;
+  const vw = window.innerWidth, vh = window.innerHeight, ratio = VIEW_W/VIEW_H;
+  let w = Math.min(vw, vh*ratio, 1180);
+  sh.style.width = w + "px";
+  sh.style.height = (w/ratio) + "px";
+}
+window.addEventListener("resize", fitShell);
+window.addEventListener("orientationchange", ()=>{ fitShell(); setTimeout(fitShell,120); setTimeout(fitShell,400); });
+fitShell();
+
 /* ----------------------------- Cenas ------------------------------------ */
 const Scene = { MENU:"menu", INTRO:"intro", CHAR:"char", MAP:"map", MISSAO:"missao",
                 PLAY:"play", PAUSE:"pause", FEITO:"feito", FASE:"fase", OVER:"over",
@@ -1369,6 +1383,9 @@ function frame(t){
 /* ----------------------------- Botões ----------------------------------- */
 function bind(id, fn){ const el=document.getElementById(id); if(el) el.addEventListener("click", ()=>{ audio(); fn(); }); }
 bind("btn-start", ()=>{ introStep=0; showScene(Scene.INTRO); });
+// tela de boas-vindas no celular (como jogar em tela cheia) — aparece logo no início
+if (touchEnabled) { const sh=document.getElementById("start-help"); if(sh) sh.classList.remove("hidden"); }
+bind("btn-starthelp-ok", ()=>{ const sh=document.getElementById("start-help"); if(sh) sh.classList.add("hidden"); fitShell(); });
 bind("btn-help", ()=>showScene(Scene.HELP));
 bind("btn-help-back", ()=>showScene(Scene.MENU));
 bind("btn-intro-next", introNext);

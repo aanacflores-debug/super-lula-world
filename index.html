@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20">
+<link rel="stylesheet" href="css/style.css?v=21">
 </head>
 <body>
 <div id="game-shell">
@@ -38,6 +38,21 @@
   <!-- Banner de narrativa (blocos ?) -->
   <div id="fact-banner" class="hidden"></div>
 
+  <!-- Tela de boas-vindas no celular: como jogar em tela cheia (aparece no início) -->
+  <div id="start-help" class="hidden">
+    <div class="sh-card">
+      <div class="sh-ico">📱🔄</div>
+      <h2>Antes de começar</h2>
+      <p class="sh-lead">Este é um jogo de <b>tela deitada</b>. Para a melhor experiência:</p>
+      <ol class="sh-steps">
+        <li><b>Deite o celular</b> na horizontal. 🔄</li>
+        <li>Para <b>tela cheia</b>, toque no ícone <b>▣</b> (quadradinho) na barra do navegador.</li>
+        <li>Toque nos <b>3 pontinhos</b> <b>•••</b> e escolha <b>“Ocultar Barra de Ferramentas”</b>.</li>
+      </ol>
+      <button id="btn-starthelp-ok" class="big-btn">OK, entendi! ▶</button>
+    </div>
+  </div>
+
   <!-- Aviso: gire o celular (só aparece em retrato no celular) -->
   <div id="rotate-hint">
     <div class="rot-inner">
@@ -64,7 +79,6 @@
       <p class="tagline">A jornada para reconstruir o Brasil</p>
       <button id="btn-start" class="big-btn">▶ COMEÇAR</button>
       <button id="btn-help" class="ghost-btn">Como jogar</button>
-      <p class="mobile-tip">📱 <b>No celular:</b> deite o aparelho (horizontal). Para <b>tela cheia</b>, no Safari toque em <b>“aA”</b> na barra de endereço → <b>“Ocultar Barra de Ferramentas”</b>.</p>
       <p class="credits">Um tributo didático em forma de joguinho</p>
     </div>
   </div>
@@ -188,7 +202,7 @@
 
 </div>
 
-<script src="js/levels.js?v=20"></script>
-<script src="js/game.js?v=20"></script>
+<script src="js/levels.js?v=21"></script>
+<script src="js/game.js?v=21"></script>
 </body>
 </html>
