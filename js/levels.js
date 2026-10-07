@@ -108,6 +108,14 @@ const LEVELS = [
     missao: "No sertão, muita gente passava fome. Pule os buracos, desvie dos políticos do atraso e derrote A FOME para garantir comida na mesa do povo.",
     chefe: "fome", cenario: "sertao",
     corCeu1: "#ff9a3d", corCeu2: "#ffe0a8", tutorial: true,
+    fatos: [
+      "O Lula nasceu em 1945, em Caetés, no sertão de Pernambuco.",
+      "Criança ainda, migrou de pau-de-arara com a família para São Paulo, fugindo da seca.",
+      "Pobre, foi engraxate e vendedor ambulante antes de virar torneiro mecânico.",
+      "A fome que ele viu de perto virou prioridade: em 2003 nasceu o Fome Zero.",
+      "Comer todo dia é um direito — o Bolsa Família ajuda milhões de famílias a garantir isso.",
+      "Em 2014 o Brasil saiu do Mapa da Fome da ONU pela primeira vez."
+    ],
     rows: [
       "                                                    ",
       "                                                    ",
@@ -127,6 +135,14 @@ const LEVELS = [
     missao: "Sem remédio e sem médico, o povo adoecia. Vença O DESMONTE e reconstrua a saúde pública para todos.",
     chefe: "desmonte", cenario: "cidade",
     corCeu1: "#3d9bff", corCeu2: "#cfeaff", tutorial: false,
+    fatos: [
+      "Num acidente de trabalho, o jovem Lula perdeu um dedo da mão esquerda.",
+      "Ele virou líder dos metalúrgicos do ABC e comandou grandes greves nos anos 1970.",
+      "Ajudou a fundar a CUT e o Partido dos Trabalhadores (PT).",
+      "Saúde é direito: o SUS atende todo mundo de graça.",
+      "O Mais Médicos levou atendimento a cidades que não tinham nenhum médico.",
+      "A Farmácia Popular dá remédios de graça ou com desconto em todo o país."
+    ],
     rows: [
       "                                                          ",
       "                                                          ",
@@ -146,6 +162,14 @@ const LEVELS = [
     missao: "Salário curto, aluguel caro e jornada sem fim. Derrote A DESIGUALDADE e devolva dignidade a quem trabalha.",
     chefe: "desigualdade", cenario: "campo",
     corCeu1: "#2fb15a", corCeu2: "#d6f6dd", tutorial: false,
+    fatos: [
+      "Lula concorreu à presidência em 1989, 1994 e 1998 antes de vencer.",
+      "Em 2002 foi eleito presidente pela primeira vez, com mais de 52 milhões de votos.",
+      "Valorizar o salário mínimo acima da inflação dá mais poder de compra ao povo.",
+      "Como a aposentadoria segue o salário mínimo, milhões de idosos também ganham.",
+      "O Minha Casa Minha Vida ajudou milhões de famílias a sair do aluguel.",
+      "Trabalho digno também é ter tempo para descansar e viver com a família."
+    ],
     rows: [
       "                                                            ",
       "                                                            ",
@@ -165,6 +189,14 @@ const LEVELS = [
     missao: "A última batalha. Enfrente A AMEAÇA À DEMOCRACIA e garanta educação, energia e liberdade para o povo brasileiro.",
     chefe: "democracia", cenario: "capital",
     corCeu1: "#8e4bd1", corCeu2: "#ead6ff", tutorial: false,
+    fatos: [
+      "Educação muda o país: o ProUni deu bolsas para filhos de trabalhadores na faculdade.",
+      "Foram criadas dezenas de novas universidades e institutos federais pelo Brasil.",
+      "O Luz para Todos levou energia elétrica a quem nunca tinha tido.",
+      "Energia em casa é estudo à noite, geladeira funcionando e mais dignidade.",
+      "Defender a soberania é cuidar do que é do Brasil e do seu povo.",
+      "Democracia é o povo decidindo seu futuro — e isso se defende todo dia."
+    ],
     rows: [
       "                                                              ",
       "                                                              ",
@@ -184,10 +216,10 @@ const LEVELS = [
 /* -------- Mapa do Brasil: posição de cada fase por região (0..1) -------- */
 /* Fase 1 Nordeste (sertão) · Fase 2 Sudeste · Fase 3 Sul · Fase 4 Centro(Brasília) */
 const MAPA_NOS = [
-  { x: 0.70, y: 0.30 },
-  { x: 0.63, y: 0.55 },
-  { x: 0.52, y: 0.70 },
-  { x: 0.55, y: 0.46 }
+  { x: 0.68, y: 0.27 },   // Fase 1 — Nordeste (sertão)
+  { x: 0.60, y: 0.56 },   // Fase 2 — Sudeste
+  { x: 0.49, y: 0.70 },   // Fase 3 — Sul
+  { x: 0.52, y: 0.47 }    // Fase 4 — Centro (Brasília)
 ];
 
 window.SLW_DATA = { HISTORIA, HEROIS, CONQUISTAS, CHEFES, LEVELS, MAPA_NOS };

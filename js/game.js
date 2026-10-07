@@ -11,6 +11,7 @@ const { HISTORIA, HEROIS, CONQUISTAS, CHEFES, LEVELS, MAPA_NOS } = window.SLW_DA
 
 /* ----------------------------- Constantes ------------------------------- */
 const VIEW_W = 1280, VIEW_H = 704, TS = 64, ROWS = 11;
+const GROUND_Y = (ROWS - 1) * TS;   // linha do chão (topo da última fileira)
 const GRAVITY = 0.85, MAX_FALL = 19;
 const MOVE_ACC = 1.05, AIR_ACC = 0.72, FRICTION = 0.8, MOVE_MAX = 6.4;
 const JUMP_VEL = -18.4, JUMP_CUT = 0.45, COYOTE = 7, JUMP_BUF = 8;
@@ -49,6 +50,7 @@ let cam = { x: 0 };
 let votos = 0, vidas = 3;
 let deathTimer = 0;
 let lastSafe = { x: 0, y: 0 };   // checkpoint (último chão pisado)
+let factIndex = 0, factTimer = 0; // narrativa dos blocos '?'
 let levelClearTimer = 0;
 let deedQueue = [];
 let hints = [], currentHint = "";
@@ -188,6 +190,7 @@ function loadLevel(idx) {
     if (boss) hints.push({ x: boss.x - 7*TS, text: "Chegou o <b>CHEFÃO</b>! Pule na cabeça dele várias vezes" });
   }
   currentHint = ""; document.getElementById("tutorial-hint").classList.add("hidden");
+  factIndex = 0; factTimer = 0; document.getElementById("fact-banner").classList.add("hidden");
 
   resetPlayerAndEnemies();
   cam.x = 0; deathTimer = 0;
@@ -247,13 +250,23 @@ function headBonk(c, r) {
   if (grid[r] && grid[r][c] === "?") {
     grid[r][c] = "Q"; votos += 1;
     spawnParticles((c+0.5)*TS, r*TS, "#ffd12e", 8); sfx("block"); updateHUD();
+    // narrativa: cada bloco conta um pedaço da história
+    const fatos = LEVELS[levelIndex].fatos || [];
+    if (factIndex < fatos.length) { showFact(fatos[factIndex]); factIndex++; }
   }
+}
+function showFact(text){
+  const el = document.getElementById("fact-banner");
+  el.innerHTML = "<span class='fb-tag'>📖 A HISTÓRIA DO LULA</span>" + text;
+  el.classList.remove("hidden");
+  factTimer = 380; // ~6s
 }
 
 /* ----------------------------- Update ----------------------------------- */
 function update() {
   player.t++; enemies.forEach((e)=>e.t++); if (boss) boss.t++;
   updateParticles();
+  if (factTimer>0 && --factTimer===0) document.getElementById("fact-banner").classList.add("hidden");
 
   if (levelClearTimer > 0) {
     levelClearTimer--; player.vy += GRAVITY; moveAndCollide(player, false);
@@ -499,7 +512,7 @@ function showScene(s) {
   document.getElementById("hud").classList.toggle("hidden", !playingHud);
   const showBoss = (s===Scene.PLAY && bossActive && boss && boss.alive);
   document.getElementById("boss-bar").classList.toggle("hidden", !showBoss);
-  if (s!==Scene.PLAY) document.getElementById("tutorial-hint").classList.add("hidden");
+  if (s!==Scene.PLAY) { document.getElementById("tutorial-hint").classList.add("hidden"); document.getElementById("fact-banner").classList.add("hidden"); }
 
   if (s===Scene.INTRO) renderIntroSlide();
   if (s===Scene.MAP) document.getElementById("map-sub").textContent =
@@ -627,42 +640,42 @@ function cloud(x,y,s){ ctx.fillStyle="rgba(255,255,255,.85)"; ctx.beginPath();
 function hill(cx,baseY,w,h){ ctx.beginPath(); ctx.moveTo(cx-w/2,baseY); ctx.quadraticCurveTo(cx,baseY-h,cx+w/2,baseY); ctx.fill(); }
 
 /* cenário temático por fase (parallax) */
+/* Camada de parallax SUAVE: a identidade de cada elemento vem do índice no
+   MUNDO (não da posição de tela), então nada "pisca" ao andar. */
+function sceneryLayer(p, spacing, cb){
+  const base = cam.x * p;
+  const i0 = Math.floor((base - spacing) / spacing);
+  const i1 = Math.ceil((base + VIEW_W + spacing) / spacing);
+  for (let i=i0;i<=i1;i++) cb(i, i*spacing - base);
+}
+function hashN(i, n){ let h=(i*2654435761)>>>0; h^=h>>>13; return (h>>>0)%n; }
+
 function drawScenery(def){
-  const off = cam.x*0.3;
-  // nuvens
-  for(let i=0;i<5;i++){ const x=(i*360 - cam.x*0.15)%(VIEW_W+360); cloud(x<0?x+VIEW_W+360:x, 80+(i%2)*50, 1); }
-  ctx.save();
+  // nuvens (bem lentas)
+  sceneryLayer(0.12, 360, (i,x)=> cloud(x+60, 64 + hashN(i,3)*44, 1));
+
   if (def.cenario==="sertao") {
-    // morros secos da caatinga
     ctx.fillStyle="#c79e63";
-    for(let x=-((off)%540)-540; x<VIEW_W+540; x+=540){ hill(x+270,VIEW_H-128,470,112); }
-    // vegetação típica (mandacaru, carnaúba, juazeiro, árvore seca)
-    for(let x=-((off)%235)-235; x<VIEW_W+235; x+=235){
-      const tp=((Math.floor((x+off)/235))%4+4)%4, bx=x+120, by=VIEW_H-120;
-      if(tp===0) mandacaru(bx,by); else if(tp===1) carnauba(bx,by);
-      else if(tp===2) juazeiro(bx,by); else dryTree(bx,by);
-    }
+    sceneryLayer(0.28, 520, (i,x)=> hill(x+260, GROUND_Y+6, 500, 122));
+    sceneryLayer(0.5, 230, (i,x)=>{ const t=hashN(i,4), bx=x+115, by=GROUND_Y;
+      if(t===0) mandacaru(bx,by); else if(t===1) carnauba(bx,by);
+      else if(t===2) juazeiro(bx,by); else dryTree(bx,by); });
   } else if (def.cenario==="cidade") {
-    // prédios
-    for(let x=-off%160-160; x<VIEW_W+160; x+=160){
-      const hh=120+((x*37)%90); ctx.fillStyle=shade(def.corCeu1,-.35);
-      ctx.fillRect(x, VIEW_H-120-hh, 110, hh+120);
+    sceneryLayer(0.35, 150, (i,x)=>{
+      const hh=140+hashN(i,120);
+      ctx.fillStyle=shade(def.corCeu1,-.35);
+      ctx.fillRect(x, GROUND_Y-hh, 120, hh);
       ctx.fillStyle="rgba(255,255,220,.5)";
-      for(let wy=VIEW_H-120-hh+12; wy<VIEW_H-120; wy+=26) for(let wx=x+12;wx<x+98;wx+=26) ctx.fillRect(wx,wy,12,14);
-    }
+      for(let wy=GROUND_Y-hh+16; wy<GROUND_Y-12; wy+=26) for(let wx=x+14;wx<x+106;wx+=26) ctx.fillRect(wx,wy,12,14);
+    });
   } else if (def.cenario==="campo") {
-    ctx.fillStyle=shade(def.corCeu1,-.25);
-    for(let x=-off%520-520; x<VIEW_W+520; x+=520){ hill(x+260,VIEW_H-150,460,150); }
-    ctx.fillStyle="#2f8d3a";
-    for(let x=-off%200-200; x<VIEW_W+200; x+=200){ palm(x+100, VIEW_H-150); }
+    ctx.fillStyle=shade(def.corCeu1,-.22);
+    sceneryLayer(0.28, 540, (i,x)=> hill(x+270, GROUND_Y+6, 520, 148));
+    sceneryLayer(0.5, 215, (i,x)=>{ if(hashN(i,4)<2) palm(x+105, GROUND_Y); else juazeiro(x+105, GROUND_Y); });
   } else if (def.cenario==="capital") {
-    // Cristo + Pão de Açúcar estilizados
     ctx.fillStyle=shade(def.corCeu1,-.3);
-    for(let x=-off%600-600; x<VIEW_W+600; x+=600){ sugarloaf(x+300, VIEW_H-120); }
-    ctx.fillStyle="rgba(255,255,255,.85)";
-    const cxp=((VIEW_W*0.5)-off*0.5); christ(cxp, VIEW_H-300);
+    sceneryLayer(0.3, 560, (i,x)=>{ sugarloaf(x+280, GROUND_Y); if(i%2===0) christ(x+280, GROUND_Y-176); });
   }
-  ctx.restore();
 }
 /* --- Vegetação da caatinga --- */
 function mandacaru(x,b){            // cacto columnar nativo do sertão
@@ -904,12 +917,15 @@ function drawMap(){
   ctx.save();
   ctx.fillStyle="#f2e6c8";
   ctx.beginPath();
-  // contorno estilizado do Brasil (normalizado 0..1), sentido horário a partir do norte
+  // contorno do Brasil (normalizado 0..1), sentido horário a partir do norte
   const pts=[
-    [0.40,0.06],[0.50,0.10],[0.57,0.15],[0.64,0.19],[0.73,0.23],[0.82,0.30],
-    [0.80,0.40],[0.75,0.49],[0.69,0.57],[0.64,0.64],[0.58,0.72],[0.53,0.80],
-    [0.49,0.89],[0.45,0.81],[0.42,0.73],[0.36,0.67],[0.30,0.61],[0.21,0.57],
-    [0.13,0.52],[0.12,0.47],[0.18,0.42],[0.21,0.34],[0.27,0.25],[0.33,0.14]
+    [0.37,0.03],[0.44,0.07],[0.49,0.05],[0.52,0.10],[0.55,0.07],[0.57,0.13],
+    [0.63,0.15],[0.69,0.17],[0.74,0.20],[0.79,0.24],[0.80,0.28],[0.77,0.33],
+    [0.75,0.40],[0.72,0.46],[0.69,0.52],[0.65,0.58],[0.60,0.63],[0.55,0.68],
+    [0.51,0.73],[0.47,0.79],[0.44,0.83],[0.42,0.79],[0.41,0.73],[0.37,0.69],
+    [0.34,0.65],[0.31,0.61],[0.26,0.58],[0.20,0.55],[0.14,0.53],[0.12,0.49],
+    [0.15,0.46],[0.18,0.42],[0.20,0.37],[0.23,0.31],[0.26,0.24],[0.30,0.16],
+    [0.33,0.09]
   ];
   pts.forEach((p,i)=>{ const X=p[0]*VIEW_W, Y=p[1]*VIEW_H; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
   ctx.closePath(); ctx.fill();

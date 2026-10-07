@@ -30,6 +30,7 @@ python3 -m http.server 8000
 - **Conquistas** desbloqueadas ao derrotar cada chefão, com um resumo e um **"Você sabia?"**
   (Fome Zero, Bolsa Família, Farmácia Popular, Mais Médicos, Minha Casa Minha Vida,
   salário mínimo acima da inflação, ProUni, Luz para Todos e mais)
+- **Blocos `?` narrativos**: cada um conta um pedaço da história do Lula (do sertão à presidência)
 - **Buracos** para pular, respawn gentil no último ponto seguro
 - **Música** de fundo original (botão 🔊 liga/desliga) e efeitos sonoros
 - **Tutorial** na primeira fase, **pausa**, controles de **teclado e touch**
