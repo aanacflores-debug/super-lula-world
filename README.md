@@ -18,16 +18,20 @@ python3 -m http.server 8000
 
 ## ✨ O que tem no jogo
 
+É um **jogo educativo**: a cada fase, o jogador aprende sobre uma política real.
+
 - **Introdução com história** (a missão de reconstruir o país)
 - **Seleção de personagem**: Lula, A Professora (pula mais alto) e O Trabalhador (corre mais)
-- **Mapa do Brasil** com as fases em sequência
-- **4 fases** temáticas, cada uma com cenário brasileiro próprio
-  (sertão, cidade, campo, capital com Cristo e Pão de Açúcar)
-- **Chefões** = forças do atraso: **A Fome, O Desmonte, A Desigualdade e a Ameaça à Democracia**
-- **Conquistas** desbloqueadas ao derrotar cada chefão (Bolsa Família, Farmácia Popular,
-  Minha Casa Minha Vida, salário mínimo acima da inflação, ProUni, Luz para Todos e mais)
+- **Mapa do Brasil** no formato do país, com as fases por região
+- **4 fases** com cenário brasileiro próprio (sertão/caatinga com mandacaru e carnaúba,
+  cidade, campo, capital com Cristo e Pão de Açúcar)
+- **Vilões = "políticos do atraso"** (caricaturas genéricas de terno e gravata)
+- **Chefões** = os grandes problemas: **A Fome, O Desmonte, A Desigualdade e a Ameaça à Democracia**
+- **Conquistas** desbloqueadas ao derrotar cada chefão, com um resumo e um **"Você sabia?"**
+  (Fome Zero, Bolsa Família, Farmácia Popular, Mais Médicos, Minha Casa Minha Vida,
+  salário mínimo acima da inflação, ProUni, Luz para Todos e mais)
+- **Buracos** para pular, respawn gentil no último ponto seguro
 - **Música** de fundo original (botão 🔊 liga/desliga) e efeitos sonoros
-- **Perigos criativos**: poças de desinformação 💬 no lugar dos espinhos
 - **Tutorial** na primeira fase, **pausa**, controles de **teclado e touch**
 
 ## 🎮 Controles
@@ -57,10 +61,10 @@ Legenda: `G` chão · `B` bloco · `=` plataforma · `?` bloco surpresa · `o` v
 
 ## 📝 Nota sobre o conteúdo
 
-Tributo **positivo e didático**. Os vilões são as **forças do atraso** personificadas
-(A Fome, A Desigualdade, etc.) — **não representam pessoas reais** e o jogo não contém
-ataques pessoais nem acusações contra indivíduos. A ideia é celebrar conquistas e
-direitos, de forma leve e divertida.
+Jogo **educativo, positivo e didático**. Os vilões ("políticos do atraso") são
+caricaturas **genéricas** e os chefões são **problemas** (A Fome, A Desigualdade, etc.):
+**não representam pessoas reais** e o jogo não contém ataques pessoais nem acusações
+contra indivíduos. A ideia é ensinar, de forma leve, políticas que mudaram vidas.
 
 ---
 

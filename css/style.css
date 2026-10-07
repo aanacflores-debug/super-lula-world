@@ -205,7 +205,13 @@ h2{
   padding:4px 12px;border-radius:999px;border:2px solid var(--preto);margin-bottom:10px;
 }
 .feito-nome{color:var(--azul);margin-bottom:8px;}
-.feito-texto{font-size:clamp(14px,3vw,17px);color:#333;line-height:1.5;margin-bottom:20px;}
+.feito-texto{font-size:clamp(14px,3vw,17px);color:#333;line-height:1.5;margin-bottom:12px;}
+.feito-sabia{
+  font-size:clamp(12px,2.7vw,15px);color:#5a4a00;line-height:1.45;
+  background:#fff3c4;border:2px dashed #e0b500;border-radius:12px;
+  padding:9px 12px;margin-bottom:18px;
+}
+.feito-sabia:empty{display:none;}
 .fase-stats{font-size:clamp(14px,3vw,18px);color:#333;margin-bottom:18px;line-height:1.6;}
 
 /* ---------------- Vitória ---------------- */

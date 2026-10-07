@@ -48,6 +48,7 @@ let player = null;
 let cam = { x: 0 };
 let votos = 0, vidas = 3;
 let deathTimer = 0;
+let lastSafe = { x: 0, y: 0 };   // checkpoint (último chão pisado)
 let levelClearTimer = 0;
 let deedQueue = [];
 let hints = [], currentHint = "";
@@ -180,9 +181,9 @@ function loadLevel(idx) {
   if (def.tutorial) {
     hints = [
       { x: 1*TS,  text: "Use <b>← →</b> (ou A D) para andar" },
-      { x: 8*TS,  text: "Pule com <b>ESPAÇO / ⬆</b> — segure para pular mais alto" },
-      { x: 13*TS, text: "Pule na <b>cabeça</b> dos vilões para derrotá-los!" },
-      { x: 22*TS, text: "Desvie das <b>poças de desinformação</b> 💬" },
+      { x: 6*TS,  text: "Pule com <b>ESPAÇO / ⬆</b> embaixo do bloco <b>?</b> para soltar votos" },
+      { x: 9*TS,  text: "Pule o <b>buraco</b> — não caia!" },
+      { x: 17*TS, text: "Pule na <b>cabeça</b> dos políticos do atraso!" },
     ];
     if (boss) hints.push({ x: boss.x - 7*TS, text: "Chegou o <b>CHEFÃO</b>! Pule na cabeça dele várias vezes" });
   }
@@ -207,8 +208,20 @@ function resetPlayerAndEnemies() {
   enemies.forEach((e) => { e.x=e.sx; e.y=e.sy; e.vx=-ENEMY_SPD; e.vy=0; e.alive=true; });
   if (boss) { boss.x=boss.sx; boss.y=boss.sy; boss.hp=boss.maxhp; boss.alive=true; boss.vx=ENEMY_SPD*0.9; boss.vy=0; boss.invuln=0; }
   bossActive = false; bossDefeated = false;
+  lastSafe = { x: startPos.x, y: startPos.y };
   document.getElementById("boss-bar").classList.add("hidden");
   jumpBuffer=0; coyote=0; jumpHeld=false;
+}
+
+/* respawn gentil: volta ao último chão pisado, não ao início da fase */
+function respawnAtCheckpoint() {
+  enemies.forEach((e) => { e.x=e.sx; e.y=e.sy; e.vx=-ENEMY_SPD; e.vy=0; e.alive=true; });
+  if (boss && !bossDefeated) { boss.x=boss.sx; boss.y=boss.sy; boss.hp=boss.maxhp; boss.vx=ENEMY_SPD*0.9; boss.vy=0; boss.invuln=0; boss.alive=true; }
+  bossActive = false;
+  document.getElementById("boss-bar").classList.add("hidden");
+  player.x = lastSafe.x; player.y = lastSafe.y - 2;
+  player.vx = 0; player.vy = 0; player.invuln = INVULN; player.alive = true;
+  deathTimer = 0; jumpBuffer = 0; coyote = 0;
 }
 
 /* ----------------------------- Colisão ---------------------------------- */
@@ -274,6 +287,7 @@ function update() {
   player.vy += GRAVITY; if (player.vy>MAX_FALL) player.vy=MAX_FALL;
   moveAndCollide(player, true);
   if (player.invuln>0) player.invuln--;
+  if (player.onGround && player.vy===0) lastSafe = { x: player.x, y: player.y };
 
   if (player.y > VIEW_H + 90) { die(); return; }
 
@@ -406,7 +420,7 @@ function die() {
 }
 function afterDeath() {
   if (vidas<=0) { showScene(Scene.OVER); return; }
-  resetPlayerAndEnemies(); deathTimer=0; cam.x=0;
+  respawnAtCheckpoint();
 }
 
 /* ----------------------------- Conquistas / fim de fase ----------------- */
@@ -418,6 +432,7 @@ function processDeedQueue() {
     document.getElementById("feito-emoji").textContent = d.emoji;
     document.getElementById("feito-nome").textContent = d.nome;
     document.getElementById("feito-texto").textContent = d.texto;
+    document.getElementById("feito-sabia").textContent = d.sabia ? "💡 " + d.sabia : "";
     sfx("feito");
     showScene(Scene.FEITO);
   } else {
@@ -508,7 +523,7 @@ function primaryAction() {
 /* ----------------------------- Intro ------------------------------------ */
 function renderIntroSlide() {
   const s = HISTORIA[introStep];
-  const artEmoji = { brasil:"🇧🇷", forcas:"⚔️", conquista:"⭐", vamos:"🚀" }[s.art] || "🇧🇷";
+  const artEmoji = { brasil:"🇧🇷", forcas:"👔", conquista:"⭐", vamos:"🚀" }[s.art] || "🇧🇷";
   document.getElementById("intro-art").textContent = artEmoji;
   document.getElementById("intro-titulo").textContent = s.titulo;
   document.getElementById("intro-texto").textContent = s.texto;
@@ -618,11 +633,15 @@ function drawScenery(def){
   for(let i=0;i<5;i++){ const x=(i*360 - cam.x*0.15)%(VIEW_W+360); cloud(x<0?x+VIEW_W+360:x, 80+(i%2)*50, 1); }
   ctx.save();
   if (def.cenario==="sertao") {
-    ctx.fillStyle=shade(def.corCeu1,-.3);
-    for(let x=-off% 500 -500; x<VIEW_W+500; x+=500){ hill(x+250,VIEW_H-140,420,120); }
-    // cactos
-    ctx.fillStyle="#2f7d3a";
-    for(let x=-off%260-260; x<VIEW_W+260; x+=260){ cactus(x+130, VIEW_H-150); }
+    // morros secos da caatinga
+    ctx.fillStyle="#c79e63";
+    for(let x=-((off)%540)-540; x<VIEW_W+540; x+=540){ hill(x+270,VIEW_H-128,470,112); }
+    // vegetação típica (mandacaru, carnaúba, juazeiro, árvore seca)
+    for(let x=-((off)%235)-235; x<VIEW_W+235; x+=235){
+      const tp=((Math.floor((x+off)/235))%4+4)%4, bx=x+120, by=VIEW_H-120;
+      if(tp===0) mandacaru(bx,by); else if(tp===1) carnauba(bx,by);
+      else if(tp===2) juazeiro(bx,by); else dryTree(bx,by);
+    }
   } else if (def.cenario==="cidade") {
     // prédios
     for(let x=-off%160-160; x<VIEW_W+160; x+=160){
@@ -645,7 +664,37 @@ function drawScenery(def){
   }
   ctx.restore();
 }
-function cactus(x,b){ ctx.fillRect(x-8,b-70,16,70); ctx.fillRect(x-26,b-50,12,30); ctx.fillRect(x-26,b-50,30,12); ctx.fillRect(x+14,b-58,12,30); ctx.fillRect(x-4,b-58,30,12); }
+/* --- Vegetação da caatinga --- */
+function mandacaru(x,b){            // cacto columnar nativo do sertão
+  ctx.fillStyle="#3f7d3a";
+  ctx.fillRect(x-7,b-92,14,92);
+  ctx.fillRect(x-24,b-56,10,30); ctx.fillRect(x-24,b-56,16,10);
+  ctx.fillRect(x+14,b-68,10,36);  ctx.fillRect(x+8,b-68,16,10);
+  ctx.fillStyle="#2f5f2c"; ctx.fillRect(x-1,b-92,2,92);
+  ctx.fillStyle="#e23b5a"; ctx.beginPath(); ctx.arc(x,b-95,5,0,7); ctx.fill();
+}
+function carnauba(x,b){            // palmeira "árvore da vida"
+  ctx.fillStyle="#8a6a34"; ctx.fillRect(x-4,b-102,8,102);
+  ctx.strokeStyle="#6b4a22"; ctx.lineWidth=1;
+  for(let i=0;i<6;i++){ ctx.beginPath(); ctx.moveTo(x-4,b-100+i*16); ctx.lineTo(x+4,b-100+i*16); ctx.stroke(); }
+  ctx.fillStyle="#2f8d3a";
+  for(let a=0;a<7;a++){ const ang=-Math.PI/2+(a-3)*0.42; ctx.save(); ctx.translate(x,b-102); ctx.rotate(ang); ctx.beginPath(); ctx.ellipse(24,0,26,5,0,0,7); ctx.fill(); ctx.restore(); }
+}
+function juazeiro(x,b){            // árvore que fica verde mesmo na seca
+  ctx.fillStyle="#6b4a2a"; ctx.fillRect(x-5,b-52,10,52);
+  ctx.fillStyle="#3b8d43"; ctx.beginPath();
+  ctx.arc(x,b-64,27,0,7); ctx.arc(x-21,b-56,18,0,7); ctx.arc(x+21,b-56,18,0,7); ctx.fill();
+}
+function dryTree(x,b){            // árvore seca retorcida (caatinga na seca)
+  ctx.strokeStyle="#7a5330"; ctx.lineWidth=5; ctx.lineCap="round";
+  ctx.beginPath();
+  ctx.moveTo(x,b); ctx.lineTo(x,b-56);
+  ctx.moveTo(x,b-32); ctx.lineTo(x-19,b-50);
+  ctx.moveTo(x,b-42); ctx.lineTo(x+17,b-62);
+  ctx.moveTo(x-11,b-42); ctx.lineTo(x-21,b-31);
+  ctx.moveTo(x+9,b-52); ctx.lineTo(x+21,b-48);
+  ctx.stroke(); ctx.lineWidth=1; ctx.lineCap="butt";
+}
 function palm(x,b){ ctx.fillStyle="#6b4a2a"; ctx.fillRect(x-5,b-80,10,80); ctx.fillStyle="#2f8d3a"; for(let a=0;a<5;a++){const ang=-Math.PI/2+(a-2)*0.5; ctx.beginPath(); ctx.ellipse(x+Math.cos(ang)*34,b-80+Math.sin(ang)*20,34,10,ang,0,7); ctx.fill();} }
 function sugarloaf(x,b){ ctx.beginPath(); ctx.moveTo(x-90,b); ctx.quadraticCurveTo(x-60,b-150,x,b-170); ctx.quadraticCurveTo(x+70,b-150,x+100,b); ctx.fill(); }
 function christ(x,y){ ctx.save(); ctx.fillStyle="rgba(240,240,245,.9)"; ctx.fillRect(x-4,y,8,70); ctx.fillRect(x-45,y+16,90,8); ctx.beginPath(); ctx.arc(x,y-6,8,0,7); ctx.fill(); ctx.restore(); }
@@ -712,17 +761,46 @@ function drawEnemies(){
     drawVilao(e.x,e.y,e.w,e.h,e.vx,e.t);
   }
 }
+/* Vilão = "político do atraso": caricatura genérica de terno e gravata.
+   Não representa pessoa real. */
 function drawVilao(x,y,w,h,vx,t){
-  const bob=Math.sin(t*0.2)*2, cx=x+w/2, cy=y+h/2+bob;
-  ctx.fillStyle="#6e5a86"; roundRect(ctx,x,y+bob,w,h,10); ctx.fill();
-  ctx.fillStyle="#574468"; roundRect(ctx,x+3,y+h*0.55+bob,w-6,h*0.42,8); ctx.fill();
-  ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(cx-8,cy-7,6,0,7); ctx.arc(cx+8,cy-7,6,0,7); ctx.fill();
-  ctx.fillStyle="#15161a"; const look=vx>0?2:-2; ctx.beginPath(); ctx.arc(cx-8+look,cy-7,2.8,0,7); ctx.arc(cx+8+look,cy-7,2.8,0,7); ctx.fill();
-  ctx.strokeStyle="#2a2233"; ctx.lineWidth=2.5;
-  ctx.beginPath(); ctx.moveTo(cx-14,cy-14); ctx.lineTo(cx-4,cy-10); ctx.moveTo(cx+14,cy-14); ctx.lineTo(cx+4,cy-10); ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx,cy+10,5,Math.PI,0); ctx.stroke(); ctx.lineWidth=1;
-  ctx.fillStyle="#3f3350"; const fp=Math.sin(t*0.3)*2;
-  ctx.fillRect(x+5,y+h-3+bob,10,5+fp); ctx.fillRect(x+w-15,y+h-3+bob,10,5-fp);
+  const bob=Math.sin(t*0.18)*1.6, cx=x+w/2, topY=y+bob;
+  const fp=Math.sin(t*0.3)*2;
+  // sombra
+  ctx.fillStyle="rgba(0,0,0,.15)"; ctx.beginPath(); ctx.ellipse(cx,y+h,w*0.44,4,0,0,7); ctx.fill();
+  // pernas + sapatos
+  ctx.fillStyle="#2a2d3a";
+  ctx.fillRect(cx-w*0.22,y+h-14+bob,w*0.18,14+fp); ctx.fillRect(cx+w*0.04,y+h-14+bob,w*0.18,14-fp);
+  ctx.fillStyle="#15161a";
+  ctx.fillRect(cx-w*0.26,y+h-4+bob,w*0.22,4); ctx.fillRect(cx+w*0.04,y+h-4+bob,w*0.22,4);
+  // braços (paletó)
+  ctx.fillStyle="#2b2f44";
+  ctx.fillRect(cx-w*0.47,topY+h*0.36,w*0.15,h*0.3); ctx.fillRect(cx+w*0.32,topY+h*0.36,w*0.15,h*0.3);
+  // paletó
+  ctx.fillStyle="#30344a"; roundRect(ctx,cx-w*0.35,topY+h*0.33,w*0.7,h*0.42,6); ctx.fill();
+  // camisa branca (V)
+  ctx.fillStyle="#f4f4f0";
+  ctx.beginPath(); ctx.moveTo(cx-w*0.11,topY+h*0.33); ctx.lineTo(cx,topY+h*0.64); ctx.lineTo(cx+w*0.11,topY+h*0.33); ctx.closePath(); ctx.fill();
+  // gravata vermelha
+  ctx.fillStyle="#d11a2a";
+  ctx.beginPath(); ctx.moveTo(cx-3.5,topY+h*0.35); ctx.lineTo(cx+3.5,topY+h*0.35); ctx.lineTo(cx+5,topY+h*0.6); ctx.lineTo(cx,topY+h*0.68); ctx.lineTo(cx-5,topY+h*0.6); ctx.closePath(); ctx.fill();
+  // cabeça
+  const hw=w*0.52, hh=h*0.36, hx=cx, hy=topY;
+  ctx.fillStyle="#e3b088"; roundRect(ctx,hx-hw/2,hy,hw,hh,hw*0.3); ctx.fill();
+  // cabelo preto repartido
+  ctx.fillStyle="#1e1a18";
+  ctx.beginPath(); ctx.arc(hx,hy+hh*0.28,hw*0.56,Math.PI,0); ctx.fill();
+  ctx.fillRect(hx-hw*0.57,hy+hh*0.12,hw*1.14,hh*0.18);
+  ctx.fillStyle="#e3b088"; ctx.fillRect(hx+hw*0.08,hy+hh*0.02,2,hh*0.26);
+  // olhos + sobrancelhas (debochado)
+  const look=vx>0?1.6:-1.6;
+  ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(hx-hw*0.2,hy+hh*0.52,hw*0.14,0,7); ctx.arc(hx+hw*0.2,hy+hh*0.52,hw*0.14,0,7); ctx.fill();
+  ctx.fillStyle="#15161a"; ctx.beginPath(); ctx.arc(hx-hw*0.2+look,hy+hh*0.52,hw*0.07,0,7); ctx.arc(hx+hw*0.2+look,hy+hh*0.52,hw*0.07,0,7); ctx.fill();
+  ctx.strokeStyle="#1e1a18"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(hx-hw*0.33,hy+hh*0.36); ctx.lineTo(hx-hw*0.08,hy+hh*0.44);
+  ctx.moveTo(hx+hw*0.33,hy+hh*0.36); ctx.lineTo(hx+hw*0.08,hy+hh*0.44); ctx.stroke();
+  // sorriso torto (deboche)
+  ctx.beginPath(); ctx.moveTo(hx-hw*0.18,hy+hh*0.8); ctx.quadraticCurveTo(hx,hy+hh*0.68,hx+hw*0.22,hy+hh*0.84); ctx.stroke(); ctx.lineWidth=1;
 }
 
 function drawBoss(){
@@ -826,7 +904,13 @@ function drawMap(){
   ctx.save();
   ctx.fillStyle="#f2e6c8";
   ctx.beginPath();
-  const pts=[[0.30,0.12],[0.52,0.10],[0.60,0.22],[0.78,0.28],[0.84,0.46],[0.74,0.62],[0.70,0.82],[0.52,0.92],[0.40,0.84],[0.30,0.70],[0.22,0.52],[0.20,0.30]];
+  // contorno estilizado do Brasil (normalizado 0..1), sentido horário a partir do norte
+  const pts=[
+    [0.40,0.06],[0.50,0.10],[0.57,0.15],[0.64,0.19],[0.73,0.23],[0.82,0.30],
+    [0.80,0.40],[0.75,0.49],[0.69,0.57],[0.64,0.64],[0.58,0.72],[0.53,0.80],
+    [0.49,0.89],[0.45,0.81],[0.42,0.73],[0.36,0.67],[0.30,0.61],[0.21,0.57],
+    [0.13,0.52],[0.12,0.47],[0.18,0.42],[0.21,0.34],[0.27,0.25],[0.33,0.14]
+  ];
   pts.forEach((p,i)=>{ const X=p[0]*VIEW_W, Y=p[1]*VIEW_H; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
   ctx.closePath(); ctx.fill();
   ctx.strokeStyle="#c9b78a"; ctx.lineWidth=4; ctx.stroke(); ctx.lineWidth=1;
