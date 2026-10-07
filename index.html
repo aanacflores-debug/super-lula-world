@@ -6,10 +6,18 @@
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <title>Super Lula World</title>
 <meta name="description" content="Super Lula World — jogo de plataforma didático e tributo às conquistas do povo brasileiro. Enfrente as forças do atraso e reconstrua o Brasil!">
+<!-- PWA: instalar na tela inicial e abrir em tela cheia -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1b3fae">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lula World">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=23">
+<link rel="stylesheet" href="css/style.css?v=24">
 </head>
 <body>
 <div id="game-shell">
@@ -202,7 +210,13 @@
 
 </div>
 
-<script src="js/levels.js?v=23"></script>
-<script src="js/game.js?v=23"></script>
+<script src="js/levels.js?v=24"></script>
+<script src="js/game.js?v=24"></script>
+<script>
+  // registra o app (PWA) — permite "Adicionar à Tela de Início" e tela cheia
+  if ("serviceWorker" in navigator) {
+    addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(()=>{}));
+  }
+</script>
 </body>
 </html>
