@@ -205,12 +205,13 @@ h2{
   box-shadow:0 6px 20px rgba(0,0,0,.4);
 }
 .pn-title{font-family:'Baloo 2',sans-serif;font-weight:800;color:#fff;
-  font-size:clamp(11px,2.3vw,15px);margin-bottom:6px;letter-spacing:.3px;}
+  font-size:clamp(11px,2.3vw,15px);margin-bottom:1px;letter-spacing:.3px;}
+.pn-sub{color:#aab0bd;font-size:clamp(8.5px,1.7vw,10.5px);margin-bottom:6px;line-height:1.15;}
 .pn-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid rgba(255,255,255,.12);}
 .pn-ico{font-size:clamp(13px,2.6vw,17px);flex:0 0 auto;}
 .pn-nome{flex:1;color:#e9e9ef;font-size:clamp(10px,2.1vw,12.5px);line-height:1.15;}
 .pn-nome small{display:block;color:#9aa0ad;font-size:.82em;}
-.pn-val{flex:0 0 auto;text-align:right;color:#cfd3db;font-size:clamp(10px,2.1vw,12.5px);font-weight:600;white-space:nowrap;}
+.pn-val{flex:0 0 auto;max-width:48%;text-align:right;color:#cfd3db;font-size:clamp(10px,2.1vw,12.5px);font-weight:600;line-height:1.15;}
 .pn-antes{color:#e88;}
 .pn-depois{color:#49d67e;}
 .pn-ok .pn-val{color:#49d67e;}

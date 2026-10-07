@@ -630,7 +630,8 @@ function updateHUD() {
 /* Painel do Brasil: indicadores reais que melhoram conforme as fases são vencidas. */
 function updatePainel() {
   const el = document.getElementById("painel-br"); if (!el) return;
-  let html = '<div class="pn-title">📊 Painel do Brasil</div>';
+  let html = '<div class="pn-title">📊 O Brasil: antes → agora</div>' +
+    '<div class="pn-sub">De 2002/2003 até hoje — melhora a cada conquista</div>';
   PAINEL.forEach((p) => {
     const ok = completed > p.mapa;
     const val = ok

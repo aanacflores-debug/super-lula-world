@@ -107,19 +107,25 @@ const CHEFES = {
 };
 
 /* ------------------------------- PAINEL DO BRASIL ----------------------
- * Indicadores reais (antes → agora). Cada um "melhora" quando o mapa com
- * índice 'mapa' é concluído.  Fontes citadas no próprio painel.           */
+ * Linha do tempo: como o Brasil ESTAVA antes das políticas (2002/2003) e
+ * como ficou DEPOIS delas (hoje). Cada quadro "melhora" quando o mapa de
+ * índice 'mapa' é concluído. Ano real e fonte citados em cada quadro.
+ * Fontes: ONU/FAO (Mapa da Fome, saída em 2014 e 2025); Banco Mundial
+ * (pobreza extrema 2003→2010); IBGE/leis (salário mínimo R$200 em 2002 →
+ * R$1.518 em 2025); PME 2003 e PNAD Contínua/IBGE 2025 (desemprego).    */
 const PAINEL = [
-  { icon: "🍽️", nome: "Fome grave", antes: "33,1 mi", depois: "8,7 mi",
-    fonte: "pessoas · IBGE/Penssan 2022→2023", mapa: 0 },
-  { icon: "🗺️", nome: "Mapa da Fome (ONU)", antes: "Dentro", depois: "Fora",
-    fonte: "ONU/FAO · 2025", mapa: 0 },
+  { icon: "🍽️", nome: "Mapa da Fome (ONU)", antes: "Dentro", depois: "Fora",
+    fonte: "ONU/FAO · no mapa em 2002; fora em 2014 e 2025", mapa: 0 },
+  { icon: "🌾", nome: "Pobreza extrema", antes: "22 mi", depois: "11,3 mi",
+    fonte: "Banco Mundial · 2003 → 2010; segue caindo hoje", mapa: 0 },
   { icon: "🩺", nome: "Saúde pública", antes: "Desmontada", depois: "Reconstruída",
-    fonte: "Mais Médicos + Farmácia Popular", mapa: 1 },
-  { icon: "💼", nome: "Desemprego", antes: "6,6%", depois: "5,1%",
-    fonte: "IBGE/PNAD 2024→2025 · recorde", mapa: 2 },
+    fonte: "Mais Médicos + Farmácia Popular retomados", mapa: 1 },
+  { icon: "💰", nome: "Salário mínimo", antes: "R$200", depois: "R$1.518",
+    fonte: "2002 → 2025 · forte ganho real (leis/IBGE)", mapa: 2 },
+  { icon: "💼", nome: "Desemprego", antes: "~12%", depois: "5,1%",
+    fonte: "2003 → 2025 · menor da série (IBGE)", mapa: 2 },
   { icon: "🗳️", nome: "Democracia e soberania", antes: "Sob ameaça", depois: "Defendidas",
-    fonte: "2º turno · o povo decide", mapa: 3 }
+    fonte: "2º turno de 2026 · o povo decide", mapa: 3 }
 ];
 
 /* ------------------------------- FASES ---------------------------------- */
