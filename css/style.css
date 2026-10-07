@@ -12,18 +12,23 @@
 
 html,body{
   height:100%;
+  height:100dvh;              /* usa a área visível real (sem contar as barras do navegador) */
   background:#0d0f14;
   font-family:'Fredoka',system-ui,sans-serif;
   color:var(--preto);
   overflow:hidden;
+  overscroll-behavior:none;   /* evita "puxar" a página e aparecer a barra do navegador */
 }
-body{display:flex;align-items:center;justify-content:center;}
+body{
+  position:fixed; inset:0; width:100%;   /* trava a página no lugar */
+  display:flex;align-items:center;justify-content:center;
+}
 
 #game-shell{
   position:relative;
-  width:min(100vw,1180px);
   aspect-ratio:1280/704;
-  max-height:100vh;
+  /* maior tamanho que cabe NA TELA mantendo a proporção (largura OU altura) */
+  width:min(100vw, 100dvh*1280/704, 1180px);
   background:#000;
   overflow:hidden;
   box-shadow:0 0 0 4px #000, 0 20px 60px rgba(0,0,0,.6);

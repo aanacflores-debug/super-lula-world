@@ -49,6 +49,7 @@ let player = null;
 let cam = { x: 0 };
 let votos = 0, vidas = 3;
 let fortaoOn = false;             // vira Lula Fortão ao juntar FORTAO_VOTOS (fica até o fim)
+let transformT = 0;               // animação da transformação (frames)
 const FORTAO_VOTOS = 40;
 let deathTimer = 0;
 let lastSafe = { x: 0, y: 0 };   // checkpoint (último chão pisado)
@@ -89,8 +90,7 @@ document.querySelectorAll(".tbtn").forEach((btn) => {
   btn.addEventListener("pointercancel", r);
   btn.addEventListener("pointerleave", r);
 });
-if (window.matchMedia("(hover:none) and (pointer:coarse)").matches)
-  document.getElementById("touch-controls").classList.remove("hidden");
+const touchEnabled = window.matchMedia("(hover:none) and (pointer:coarse)").matches;
 
 /* ----------------------------- Áudio / Música --------------------------- */
 let actx = null, musicOn = true, musicTimer = null, musicStep = 0;
@@ -277,6 +277,7 @@ function showFact(text, tag, frames){
 /* ----------------------------- Update ----------------------------------- */
 function update() {
   player.t++; enemies.forEach((e)=>e.t++); if (boss) boss.t++;
+  if (transformT>0) { transformT--; if (player && player.t%3===0) spawnParticles(player.x+player.w/2, player.y+player.h*0.4, "#ffd12e", 2); }
   updateParticles();
   if (factTimer>0 && --factTimer===0) document.getElementById("fact-banner").classList.add("hidden");
 
@@ -329,9 +330,13 @@ function curTrait(){ return fortaoOn ? "forte" : (player && player.trait); }
 /* checa se juntou votos suficientes p/ virar Fortão (fica até o fim) */
 function checkFortao(){
   if (fortaoOn || votos < FORTAO_VOTOS) return;
-  fortaoOn = true; sfx("select");
-  if (player) spawnParticles(player.x+player.w/2, player.y+player.h/2, "#ffd12e", 28);
-  showFact("Com o apoio do povo, o Lula vira o LULA FORTÃO! Agora ele derruba o político do atraso só de encostar — e não toma dano. 💪", "💪 LULA FORTÃO!", 320);
+  fortaoOn = true; transformT = 72; sfx("select");
+  if (player){
+    player.invuln = Math.max(player.invuln, 60);   // pequena invencibilidade no momento
+    spawnParticles(player.x+player.w/2, player.y+player.h/2, "#ffd12e", 30);
+    spawnParticles(player.x+player.w/2, player.y+player.h/2, "#ffffff", 16);
+  }
+  showFact("O POVO DEU FORÇA! Agora, até o FIM da jornada, o Lula Fortão: 💪 derruba o político do atraso só de ENCOSTAR · 🛡️ não toma dano no corpo a corpo. Bora reconstruir o Brasil!", "💪 LULA FORTÃO!", 360);
 }
 function defeatEnemy(e, bounce){
   e.alive=false;
@@ -521,7 +526,7 @@ function win() {
 
 /* ----------------------------- Fluxo de cenas --------------------------- */
 function newGame() {
-  votos=0; vidas=3; completed=0; collectedDeeds.length=0; fortaoOn=false; heroId=selectedChar;
+  votos=0; vidas=3; completed=0; collectedDeeds.length=0; fortaoOn=false; transformT=0; heroId=selectedChar;
   showScene(Scene.MAP);
 }
 function enterLevel(idx) {
@@ -561,6 +566,8 @@ function showScene(s) {
   document.getElementById("hud").classList.toggle("hidden", !playingHud);
   const showBoss = (s===Scene.PLAY && bossActive && boss && boss.alive);
   document.getElementById("boss-bar").classList.toggle("hidden", !showBoss);
+  // controles de toque só aparecem jogando (não no menu/mapa/telas)
+  document.getElementById("touch-controls").classList.toggle("hidden", !(touchEnabled && (s===Scene.PLAY || s===Scene.PAUSE)));
   if (s!==Scene.PLAY) { document.getElementById("tutorial-hint").classList.add("hidden"); document.getElementById("fact-banner").classList.add("hidden"); }
 
   if (s===Scene.INTRO) renderIntroSlide();
@@ -705,7 +712,7 @@ function drawBackdrop() {
   drawSun(VIEW_W-150,120);
   for(let i=0;i<5;i++){ const x=(i*320 - bgT*0.25)%(VIEW_W+320); cloud(x<0?x+VIEW_W+320:x, 90+(i%2)*60, 1.1); }
   // morros verdes + bandeirinha
-  ctx.fillStyle="#2faa4e"; hill(VIEW_W*0.25,VIEW_H-120,260,130); hill(VIEW_W*0.7,VIEW_H-120,300,150);
+  ctx.fillStyle="#2faa4e"; hill(VIEW_W*0.25,VIEW_H-64,260,130); hill(VIEW_W*0.7,VIEW_H-64,300,150);
   ctx.fillStyle="#1f9d55"; ctx.fillRect(0,VIEW_H-70,VIEW_W,70);
 }
 
@@ -1049,15 +1056,50 @@ function drawPlayer(){
   let state = p.onGround ? (walking?"walk":"idle") : "jump";
   if(dying) state = "dead";
   // tremidinha estilo Mario nos primeiros quadros da morte
-  const shake = (dying && deathTimer>40) ? Math.sin(p.t*1.7)*4 : 0;
-  drawHero(ctx, p.x+p.w/2+shake, p.y, p.h, fortaoOn?"forte":p.skin, p.facing, state, swing, p.t);
+  let shake = (dying && deathTimer>40) ? Math.sin(p.t*1.7)*4 : 0;
+  const cx0 = p.x+p.w/2, cy0 = p.y;
+
+  // ---- animação da transformação em Fortão ----
+  if(transformT>0 && !dying){
+    const pr = 1 - transformT/72;                 // 0 -> 1
+    const pop = Math.sin(pr*Math.PI);             // sobe e volta
+    // raios/brilho dourado atrás
+    ctx.save();
+    ctx.globalAlpha = 0.25 + 0.35*pop;
+    const gg = ctx.createRadialGradient(cx0, cy0+p.h*0.5, 6, cx0, cy0+p.h*0.5, p.h*(0.7+pop*0.5));
+    gg.addColorStop(0,"#fff3b0"); gg.addColorStop(0.5,"rgba(255,209,46,.6)"); gg.addColorStop(1,"rgba(255,209,46,0)");
+    ctx.fillStyle=gg; ctx.beginPath(); ctx.arc(cx0, cy0+p.h*0.5, p.h*(0.7+pop*0.5), 0, 7); ctx.fill();
+    // raiozinhos girando
+    ctx.globalAlpha = 0.5*pop; ctx.strokeStyle="#ffd12e"; ctx.lineWidth=3;
+    for(let i=0;i<8;i++){ const a=i*Math.PI/4 + p.t*0.15, r1=p.h*0.5, r2=p.h*(0.8+pop*0.4);
+      ctx.beginPath(); ctx.moveTo(cx0+Math.cos(a)*r1, cy0+p.h*0.5+Math.sin(a)*r1); ctx.lineTo(cx0+Math.cos(a)*r2, cy0+p.h*0.5+Math.sin(a)*r2); ctx.stroke(); }
+    ctx.restore();
+    // pop de escala (cresce e volta) + pose de "flex" no auge
+    const sc = 1 + pop*0.4;
+    shake += Math.sin(p.t*2.2)*2*pop;             // vibra ao bombar
+    if(pr>0.2 && pr<0.9) state = "flex";
+    ctx.save();
+    ctx.translate(cx0, cy0+p.h); ctx.scale(sc, sc); ctx.translate(-cx0, -(cy0+p.h));
+    drawHero(ctx, cx0+shake, cy0, p.h, "forte", p.facing, state, swing, p.t);
+    ctx.restore();
+    return;
+  }
+
+  // aura sutil permanente quando já é Fortão
+  if(fortaoOn){
+    const au = 0.12 + 0.06*Math.sin(p.t*0.12);
+    ctx.save(); ctx.globalAlpha=au; ctx.fillStyle="#ffd12e";
+    ctx.beginPath(); ctx.ellipse(cx0, cy0+p.h*0.5, p.w*0.75, p.h*0.62, 0, 0, 7); ctx.fill(); ctx.restore();
+  }
+
+  drawHero(ctx, cx0+shake, cy0, p.h, fortaoOn?"forte":p.skin, p.facing, state, swing, p.t);
 }
 /* Desenha o Lula — caricato e reconhecível (cabelo + barba grisalhos SEMPRE).
    skin: 'red' (camiseta+boné), 'suit' (terno), 'hat' (chapéu), 'forte' (bombado).
    state: 'idle' | 'walk' | 'jump' | 'dead'.  tick: contador p/ animação (respirada). */
 function drawHero(c, cx, topY, H, skin, facing, state, swing, tick){
   const t = tick||0, y = topY;
-  const air=(state==="jump"), dead=(state==="dead"), walking=(state==="walk");
+  const air=(state==="jump"), dead=(state==="dead"), walking=(state==="walk"), flex=(state==="flex");
   const breath = (state==="idle") ? Math.sin(t*0.09)*1.6 : 0;
   const s = walking ? Math.sin(t*0.3) : 0;
 
@@ -1105,9 +1147,9 @@ function drawHero(c, cx, topY, H, skin, facing, state, swing, tick){
 
   // ===== ordem de profundidade =====
   // braço de trás
-  if(air||dead) drawArm(-2.45,true); else if(walking) drawArm(0.25 + s*0.8,true); else drawArm(0.3,true);
+  if(flex) drawArm(-2.7,true); else if(air||dead) drawArm(-2.45,true); else if(walking) drawArm(0.25 + s*0.8,true); else drawArm(0.3,true);
   // perna de trás
-  if(air||dead) drawLeg(-H*0.10,-0.5,true); else if(walking) drawLeg(-s*H*0.14,-s*0.45,true); else drawLeg(-H*0.05,0,true);
+  if(flex) drawLeg(-H*0.16,-0.12,true); else if(air||dead) drawLeg(-H*0.10,-0.5,true); else if(walking) drawLeg(-s*H*0.14,-s*0.45,true); else drawLeg(-H*0.05,0,true);
 
   // ---------- tronco ----------
   c.fillStyle=shirt; roundRect(c,cx-bw/2,tY,bw,tH,buff?12:9); c.fill();
@@ -1128,9 +1170,9 @@ function drawHero(c, cx, topY, H, skin, facing, state, swing, tick){
   }
 
   // perna da frente
-  if(air||dead) drawLeg(H*0.12,0.55,false); else if(walking) drawLeg(s*H*0.14,s*0.45,false); else drawLeg(H*0.07,0,false);
+  if(flex) drawLeg(H*0.16,0.12,false); else if(air||dead) drawLeg(H*0.12,0.55,false); else if(walking) drawLeg(s*H*0.14,s*0.45,false); else drawLeg(H*0.07,0,false);
   // braço da frente
-  if(air||dead) drawArm(-1.95,false); else if(walking) drawArm(-0.25 - s*0.8,false); else drawArm(-0.2,false);
+  if(flex) drawArm(-2.3,false); else if(air||dead) drawArm(-1.95,false); else if(walking) drawArm(-0.25 - s*0.8,false); else drawArm(-0.2,false);
 
   // ================= CABEÇA (perfil, olhando p/ +x) =================
   // cabelo de trás (atrás do crânio)
