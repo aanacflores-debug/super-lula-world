@@ -8,7 +8,8 @@
   --creme:#fff7e6;
 }
 
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 
 html,body{
   height:100%;
@@ -105,22 +106,27 @@ body{
   font-size:.78em;color:var(--amarelo);letter-spacing:1px;margin-bottom:3px;
 }
 #fact-banner .fb-close{display:none;}
-/* No celular: mensagens compactas no topo, não cobrem o jogo, e com "fechar" */
+.mobile-tip{display:none;}  /* dica de tela cheia: só no celular */
+/* No celular: mensagens compactas, ABAIXO do HUD (não cobrem o placar), e com "fechar" */
 @media (hover:none) and (pointer:coarse){
-  #fact-banner{top:6px;max-width:86%;padding:6px 12px;font-size:12px;line-height:1.28;border-radius:11px;}
+  #hud{padding:5px 8px;gap:5px;}
+  .hud-item{padding:3px 8px;font-size:clamp(11px,2vw,15px);}
+  #fact-banner{top:54px;max-width:74%;padding:6px 11px;font-size:11.5px;line-height:1.26;border-radius:11px;}
   #fact-banner .fb-tag{font-size:.72em;margin-bottom:2px;}
-  #fact-banner .fb-close{display:block;margin-top:5px;font-size:.78em;color:#aab0bd;font-weight:600;}
+  #fact-banner .fb-close{display:block;margin-top:4px;font-size:.78em;color:#aab0bd;font-weight:600;}
   #tutorial-hint{bottom:8px;top:auto;font-size:11px;padding:5px 12px;max-width:56%;}
 }
 
 /* ---------------- Telas genéricas ---------------- */
 .screen{
   position:absolute;inset:0;z-index:50;
-  display:flex;align-items:center;justify-content:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
   padding:16px;
   background:radial-gradient(120% 120% at 50% 0%, rgba(225,16,33,.2), rgba(0,0,0,.74));
-  backdrop-filter:blur(3px);animation:fade .25s ease;overflow:auto;
+  backdrop-filter:blur(3px);animation:fade .25s ease;overflow-y:auto;
 }
+/* centraliza quando cabe, mas deixa o topo acessível quando não cabe (sem cortar) */
+.screen > *{margin-block:auto;}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 .hidden{display:none !important;}
 
@@ -295,10 +301,33 @@ h2{
 .touch-right{position:absolute;right:12px;bottom:14px;}
 .tbtn{
   pointer-events:auto;width:clamp(52px,12vw,74px);height:clamp(52px,12vw,74px);
-  border-radius:50%;border:3px solid rgba(0,0,0,.55);background:rgba(255,255,255,.4);
+  border-radius:50%;border:3px solid rgba(0,0,0,.4);background:rgba(255,255,255,.28);
   color:#15161a;font-size:clamp(22px,6vw,30px);font-weight:800;
   display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);
-  user-select:none;touch-action:none;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none;
 }
-.tbtn:active{background:rgba(255,209,46,.85);}
-.tbtn-jump{width:clamp(66px,15vw,94px);height:clamp(66px,15vw,94px);background:rgba(225,16,33,.55);color:#fff;}
+.tbtn:active{background:rgba(255,209,46,.7);}
+.tbtn-jump{width:clamp(66px,15vw,94px);height:clamp(66px,15vw,94px);
+  background:rgba(225,16,33,.28);border-color:rgba(255,255,255,.4);color:#fff;}
+.tbtn-jump:active{background:rgba(225,16,33,.5);}
+
+/* ====== Compactação p/ celular — colocado NO FIM para vencer em especificidade ====== */
+@media (hover:none) and (pointer:coarse){
+  .menu-box,.feito-box,.intro-box{padding:12px 15px;border-width:3px;box-shadow:0 5px 0 var(--preto),0 10px 22px rgba(0,0,0,.5);}
+  .logo{font-size:clamp(24px,6vw,40px);margin-bottom:5px;}
+  .tagline{font-size:12px;margin-bottom:8px;}
+  .menu-box h2,.feito-box h2,.char-box h2,.intro-box h2{font-size:clamp(16px,3.8vw,21px);margin-bottom:6px;}
+  .char-list{gap:6px;margin-bottom:6px;}
+  .char-card{flex:1 1 90px;max-width:120px;padding:5px 5px 7px;}
+  .char-card canvas{width:46px;height:58px;margin-bottom:3px;}
+  .char-card .cn{font-size:12px;}
+  .char-card .cd{font-size:9.5px;line-height:1.2;margin-top:1px;}
+  .char-tip{font-size:11px;margin:1px auto 7px;}
+  .help-list{font-size:12px;gap:3px;margin-bottom:10px;}
+  .big-btn{padding:10px 18px;font-size:clamp(15px,3.6vw,18px);}
+  .ghost-btn{font-size:13px;}
+  .credits{font-size:10px;margin-top:6px;}
+  .mobile-tip{display:block;margin:8px auto 2px;max-width:340px;
+    font-size:11px;line-height:1.3;color:#6a4a2a;
+    background:rgba(255,209,46,.22);border:1px dashed #d8a73a;border-radius:10px;padding:7px 9px;}
+}
