@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Super Lula World</title>
+<meta name="description" content="Super Lula World — um jogo de plataforma tributo às realizações do governo Lula. Corra, pule e colete os bons feitos!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="game-shell">
+
+  <!-- Área do jogo -->
+  <canvas id="game" width="912" height="528"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-item"><span class="hud-ico">❤️</span><span id="hud-vidas">3</span></div>
+    <div class="hud-item"><span class="hud-ico">🗳️</span><span id="hud-votos">0</span></div>
+    <div class="hud-item"><span class="hud-ico">⭐</span><span id="hud-feitos">0</span>/<span id="hud-feitos-total">12</span></div>
+    <div class="hud-item hud-fase"><span id="hud-fase">Fase 1</span></div>
+  </div>
+
+  <!-- Controles touch (mobile) -->
+  <div id="touch-controls" class="hidden">
+    <div class="touch-left">
+      <button class="tbtn" data-key="left" aria-label="Esquerda">◀</button>
+      <button class="tbtn" data-key="right" aria-label="Direita">▶</button>
+    </div>
+    <div class="touch-right">
+      <button class="tbtn tbtn-jump" data-key="jump" aria-label="Pular">⬆</button>
+    </div>
+  </div>
+
+  <!-- TELA: Menu inicial -->
+  <div id="screen-menu" class="screen">
+    <div class="menu-box">
+      <h1 class="logo">SUPER<br><span class="logo-lula">LULA</span><br>WORLD</h1>
+      <p class="tagline">Corra pelo Brasil, derrote os perrengues<br>e colete os <b>bons feitos</b>! 🌟</p>
+      <button id="btn-start" class="big-btn">▶ JOGAR</button>
+      <button id="btn-help" class="ghost-btn">Como jogar</button>
+      <p class="credits">Um tributo em forma de joguinho 🇧🇷</p>
+    </div>
+  </div>
+
+  <!-- TELA: Ajuda -->
+  <div id="screen-help" class="screen hidden">
+    <div class="menu-box">
+      <h2>Como jogar</h2>
+      <ul class="help-list">
+        <li><b>◀ ▶</b> ou <b>A / D</b> — andar</li>
+        <li><b>Espaço</b>, <b>W</b>, <b>↑</b> ou <b>Z</b> — pular (segure para pular mais alto)</li>
+        <li>🗳️ Colete <b>votos</b> para pontos</li>
+        <li>⭐ Pegue as <b>estrelas</b> para desbloquear um <b>bom feito</b></li>
+        <li>Pule na cabeça dos <b>perrengues</b> para derrotá-los</li>
+        <li>Fuja dos <b>espinhos</b> e não caia nos buracos!</li>
+        <li>Chegue na <b>bandeira</b> 🚩 pra vencer a fase</li>
+      </ul>
+      <button id="btn-help-back" class="big-btn">Voltar</button>
+    </div>
+  </div>
+
+  <!-- TELA: Pop-up de "bom feito" -->
+  <div id="screen-feito" class="screen hidden">
+    <div class="feito-box">
+      <div class="feito-emoji" id="feito-emoji">🧡</div>
+      <div class="feito-tag">BOM FEITO DESBLOQUEADO!</div>
+      <h2 class="feito-nome" id="feito-nome">—</h2>
+      <p class="feito-texto" id="feito-texto">—</p>
+      <button id="btn-feito-ok" class="big-btn">Seguir! ▶</button>
+    </div>
+  </div>
+
+  <!-- TELA: Fim de fase -->
+  <div id="screen-fase" class="screen hidden">
+    <div class="menu-box">
+      <h2 id="fase-titulo">Fase completa!</h2>
+      <p class="fase-stats" id="fase-stats">—</p>
+      <button id="btn-next" class="big-btn">Próxima fase ▶</button>
+    </div>
+  </div>
+
+  <!-- TELA: Game Over -->
+  <div id="screen-gameover" class="screen hidden">
+    <div class="menu-box">
+      <h2>Ih, caiu! 😅</h2>
+      <p class="tagline">Mas a luta continua.<br>Bora de novo?</p>
+      <button id="btn-retry" class="big-btn">Tentar de novo ▶</button>
+      <button id="btn-menu" class="ghost-btn">Menu</button>
+    </div>
+  </div>
+
+  <!-- TELA: Vitória -->
+  <div id="screen-win" class="screen hidden">
+    <div class="menu-box win-box">
+      <h1 class="logo win-logo">VITÓRIA! 🎉</h1>
+      <p class="tagline">Você completou o <b>Super Lula World</b><br>e reuniu os bons feitos do Brasil!</p>
+      <div id="win-feitos" class="win-feitos"></div>
+      <p class="fase-stats" id="win-stats">—</p>
+      <button id="btn-win-again" class="big-btn">Jogar de novo ▶</button>
+      <button id="btn-win-menu" class="ghost-btn">Menu</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/levels.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
