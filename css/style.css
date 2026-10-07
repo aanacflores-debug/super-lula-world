@@ -346,3 +346,19 @@ h2{
     font-size:11px;line-height:1.3;color:#6a4a2a;
     background:rgba(255,209,46,.22);border:1px dashed #d8a73a;border-radius:10px;padding:7px 9px;}
 }
+
+/* ====== Mapa no celular: painel compacto + título/dica fora do painel ====== */
+@media (hover:none) and (pointer:coarse){
+  .painel{width:min(40%,218px);top:6px;left:6px;padding:5px 8px;border-radius:11px;}
+  .pn-title{font-size:11.5px;margin-bottom:0;}
+  .pn-sub{font-size:8px;margin-bottom:3px;}
+  .pn-row{padding:2px 0;gap:5px;}
+  .pn-ico{font-size:12px;}
+  .pn-nome{font-size:9.5px;line-height:1.12;}
+  .pn-nome small{font-size:.72em;}
+  .pn-val{font-size:9.5px;max-width:42%;}
+  .map-top{left:38%;right:6px;top:8px;}
+  .map-top h2{font-size:clamp(17px,4.2vw,24px);}
+  .map-top #map-sub{font-size:11px;}
+  .map-hint{left:auto;right:8px;transform:none;bottom:8px;font-size:11px;padding:6px 12px;max-width:58%;}
+}
