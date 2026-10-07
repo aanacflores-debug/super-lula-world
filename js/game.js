@@ -48,6 +48,8 @@ let startPos = { x: 0, y: 0 };
 let player = null;
 let cam = { x: 0 };
 let votos = 0, vidas = 3;
+let fortaoOn = false;             // vira Lula Fortão ao juntar FORTAO_VOTOS (fica até o fim)
+const FORTAO_VOTOS = 40;
 let deathTimer = 0;
 let lastSafe = { x: 0, y: 0 };   // checkpoint (último chão pisado)
 let factIndex = 0, factTimer = 0; // narrativa dos blocos '?'
@@ -205,7 +207,8 @@ function loadLevel(idx) {
 }
 
 function makeEnemy(x, y, flying) {
-  return { x, y, w: TS-18, h: TS-14, vx: -ENEMY_SPD, vy:0, alive:true, onGround:false,
+  const w = flying ? TS+6 : TS-18, h = flying ? TS-8 : TS-14;  // fake news maior (leitura)
+  return { x, y, w, h, vx: -ENEMY_SPD, vy:0, alive:true, onGround:false,
            t:Math.random()*60, sx:x, sy:y, flying:!!flying, baseY:y, range:5*TS };
 }
 
@@ -255,7 +258,7 @@ function moveAndCollide(ent, bonk) {
 function headBonk(c, r) {
   if (grid[r] && grid[r][c] === "?") {
     grid[r][c] = "Q"; votos += 1;
-    spawnParticles((c+0.5)*TS, r*TS, "#ffd12e", 8); sfx("block"); updateHUD();
+    spawnParticles((c+0.5)*TS, r*TS, "#ffd12e", 8); sfx("block"); updateHUD(); checkFortao();
     // narrativa: cada bloco conta um pedaço da história
     const fatos = LEVELS[levelIndex].fatos || [];
     if (factIndex < fatos.length) { showFact(fatos[factIndex]); factIndex++; }
@@ -321,15 +324,24 @@ function update() {
   updateHints();
 }
 
+/* trait efetivo: ao virar Fortão, todo Lula luta como 'forte' */
+function curTrait(){ return fortaoOn ? "forte" : (player && player.trait); }
+/* checa se juntou votos suficientes p/ virar Fortão (fica até o fim) */
+function checkFortao(){
+  if (fortaoOn || votos < FORTAO_VOTOS) return;
+  fortaoOn = true; sfx("select");
+  if (player) spawnParticles(player.x+player.w/2, player.y+player.h/2, "#ffd12e", 28);
+  showFact("Com o apoio do povo, o Lula vira o LULA FORTÃO! Agora ele derruba o político do atraso só de encostar — e não toma dano. 💪", "💪 LULA FORTÃO!", 320);
+}
 function defeatEnemy(e, bounce){
   e.alive=false;
   if (bounce) player.vy=STOMP_VY;
   spawnParticles(e.x+e.w/2, e.y+e.h/2, e.flying?"#e9e9ef":"#9a86b0", 12);
   sfx("stomp");
-  if (player.trait==="moeda"){ votos+=5; spawnParticles(e.x+e.w/2, e.y, "#ffd12e", 10); updateHUD(); }
+  if (curTrait()==="moeda"){ votos+=5; spawnParticles(e.x+e.w/2, e.y, "#ffd12e", 10); updateHUD(); checkFortao(); }
 }
 function updateEnemies() {
-  const aggro = player.trait==="aggro";
+  const aggro = curTrait()==="aggro";
   enemies.forEach((e) => {
     if (!e.alive) return;
     if (e.flying) {
@@ -347,8 +359,8 @@ function updateEnemies() {
     if (player.invuln===0 && deathTimer===0 && aabb(player, e)) {
       const stomp = player.vy>1.5 && (player.y+player.h)-e.y < 26;
       if (stomp) defeatEnemy(e, true);
-      else if (player.trait==="forte") defeatEnemy(e, false);   // derruba no esbarrão
-      else if (player.trait==="ileso") { /* passa ileso: sem dano */ }
+      else if (curTrait()==="forte") defeatEnemy(e, false);   // derruba no esbarrão
+      else if (curTrait()==="ileso") { /* passa ileso: sem dano */ }
       else hurt();
     }
   });
@@ -427,7 +439,7 @@ function checkCoins() {
   for (const c of coins) {
     if (c.taken) continue;
     if (rectsOverlap(player.x, player.y, player.w, player.h, c.x-18, c.y-18, 36, 36)) {
-      c.taken=true; votos++; spawnParticles(c.x,c.y,"#ffd12e",6); sfx("coin"); updateHUD();
+      c.taken=true; votos++; spawnParticles(c.x,c.y,"#ffd12e",6); sfx("coin"); updateHUD(); checkFortao();
     }
   }
 }
@@ -509,7 +521,7 @@ function win() {
 
 /* ----------------------------- Fluxo de cenas --------------------------- */
 function newGame() {
-  votos=0; vidas=3; completed=0; collectedDeeds.length=0; heroId=selectedChar;
+  votos=0; vidas=3; completed=0; collectedDeeds.length=0; fortaoOn=false; heroId=selectedChar;
   showScene(Scene.MAP);
 }
 function enterLevel(idx) {
@@ -853,23 +865,25 @@ function drawEnemies(){
 function drawFakeNews(x,y,w,h,t){
   const cx=x+w/2, cy=y+h/2;
   // asas batendo
-  const flap=Math.max(1.5, 4+Math.sin(t*0.4)*4);
+  const flap=Math.max(2, 5+Math.sin(t*0.4)*5);
   ctx.fillStyle="rgba(255,255,255,.85)";
-  ctx.beginPath(); ctx.ellipse(x-4,cy-2,8,flap,-0.4,0,7); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(x+w+4,cy-2,8,flap,0.4,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x-5,cy-2,10,flap,-0.4,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x+w+5,cy-2,10,flap,0.4,0,7); ctx.fill();
   // "jornal" branco
-  ctx.fillStyle="#f3f3ee"; roundRect(ctx,x,y,w,h,4); ctx.fill();
-  ctx.strokeStyle="#c9c9c0"; ctx.lineWidth=1.5; roundRect(ctx,x+1,y+1,w-2,h-2,4); ctx.stroke(); ctx.lineWidth=1;
-  // tarja vermelha "FAKE"
-  ctx.fillStyle="#d11a2a"; ctx.fillRect(x+3,y+5,w-6,10);
-  ctx.fillStyle="#fff"; ctx.font="bold 9px 'Baloo 2',sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
-  ctx.fillText("FAKE", cx, y+10);
+  ctx.fillStyle="#f3f3ee"; roundRect(ctx,x,y,w,h,5); ctx.fill();
+  ctx.strokeStyle="#c9c9c0"; ctx.lineWidth=1.8; roundRect(ctx,x+1.5,y+1.5,w-3,h-3,5); ctx.stroke(); ctx.lineWidth=1;
+  // tarja vermelha "FAKE" (proporcional)
+  const bandH=Math.max(13,h*0.3), bandY=y+h*0.1;
+  ctx.fillStyle="#d11a2a"; ctx.fillRect(x+3,bandY,w-6,bandH);
+  ctx.fillStyle="#fff"; ctx.font="bold "+Math.round(bandH*0.82)+"px 'Baloo 2',sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText("FAKE", cx, bandY+bandH/2);
   // linhas de "texto" mentiroso
   ctx.fillStyle="#b9b9b0";
-  for(let i=0;i<3;i++) ctx.fillRect(x+5, y+20+i*6, w-10-((i*7)%10), 3);
+  const lineH=Math.max(3,h*0.07);
+  for(let i=0;i<3;i++) ctx.fillRect(x+6, bandY+bandH+5+i*(lineH+3), w-12-((i*9)%12), lineH);
   // olhinhos raivosos
   ctx.fillStyle="#15161a";
-  ctx.fillRect(cx-7, y+h-9, 4, 4); ctx.fillRect(cx+3, y+h-9, 4, 4);
+  ctx.fillRect(cx-9, y+h-11, 6, 6); ctx.fillRect(cx+3, y+h-11, 6, 6);
 }
 /* Vilão = "político do atraso": caricatura genérica de terno e gravata.
    Não representa pessoa real. */
@@ -1036,7 +1050,7 @@ function drawPlayer(){
   if(dying) state = "dead";
   // tremidinha estilo Mario nos primeiros quadros da morte
   const shake = (dying && deathTimer>40) ? Math.sin(p.t*1.7)*4 : 0;
-  drawHero(ctx, p.x+p.w/2+shake, p.y, p.h, p.skin, p.facing, state, swing, p.t);
+  drawHero(ctx, p.x+p.w/2+shake, p.y, p.h, fortaoOn?"forte":p.skin, p.facing, state, swing, p.t);
 }
 /* Desenha o Lula — caricato e reconhecível (cabelo + barba grisalhos SEMPRE).
    skin: 'red' (camiseta+boné), 'suit' (terno), 'hat' (chapéu), 'forte' (bombado).
@@ -1283,7 +1297,7 @@ function drawMap(){
   if (np) {
     const hero = HEROIS.find(h=>h.id===selectedChar) || HEROIS[0];
     const hop = Math.abs(Math.sin(bgT*0.05))*6;
-    drawHero(ctx, np.x, np.y - 30 - 54 - hop, 54, hero.skin, 1, "idle", 0, bgT);
+    drawHero(ctx, np.x, np.y - 30 - 54 - hop, 54, fortaoOn?"forte":hero.skin, 1, "idle", 0, bgT);
   }
 }
 function handleMapClick(clientX, clientY){
@@ -1346,6 +1360,7 @@ if (typeof location!=="undefined" && location.search.indexOf("slwtest")!==-1){
     setPos(x,y){player.x=x;player.y=y;player.vx=0;player.vy=0;},
     goLevel(i){enterLevel(i);}, startPlay(){startLevelPlay();},
     get camx(){return cam.x;}, kill(){die();},
+    get fortao(){return fortaoOn;}, addVotos(n){votos+=n;updateHUD();checkFortao();},
     bossPos(){return boss?{x:boss.x,y:boss.y}:null;} };
 }
 

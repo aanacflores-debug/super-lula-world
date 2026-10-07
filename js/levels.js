@@ -45,10 +45,9 @@ const HEROIS = [
   { id: "presidente", nome: "Lula Presidente", skin: "suit",  trait: "ileso",
     desc: "De terninho pra confundir os políticos: passa ileso, não toma dano no esbarrão. 🕴️" },
   { id: "povo",       nome: "Lula do Povo",    skin: "hat",   trait: "moeda",
-    desc: "Raiz, de chapéu e camisa branca: ganha votos extras ao derrotar os políticos. 🎩" },
-  { id: "fortao",     nome: "Lula Fortão",     skin: "forte", trait: "forte",
-    desc: "Marombeiro de barba branca, bombadão: derruba político no soco, só de encostar! 💪" }
+    desc: "Raiz, de chapéu e camisa branca: ganha votos extras ao derrotar os políticos. 🎩" }
 ];
+/* Forma especial: ao juntar 40 votos, QUALQUER Lula vira o FORTÃO até o fim. */
 
 /* ------------------------------- CONQUISTAS (conteúdo educativo) -------- */
 const CONQUISTAS = {
