@@ -92,12 +92,20 @@ body{display:flex;align-items:center;justify-content:center;}
   z-index:27;background:rgba(21,22,26,.9);color:#fff;
   border:2px solid var(--amarelo);border-radius:14px;
   padding:9px 18px;max-width:78%;text-align:center;
-  font-size:clamp(12px,2.5vw,16px);line-height:1.35;pointer-events:none;
+  font-size:clamp(12px,2.5vw,16px);line-height:1.35;pointer-events:auto;cursor:pointer;
   box-shadow:0 6px 22px rgba(0,0,0,.45);animation:pop .25s cubic-bezier(.2,1.5,.5,1);
 }
 #fact-banner .fb-tag{
   display:block;font-family:'Baloo 2',sans-serif;font-weight:800;
   font-size:.78em;color:var(--amarelo);letter-spacing:1px;margin-bottom:3px;
+}
+#fact-banner .fb-close{display:none;}
+/* No celular: mensagens compactas no topo, não cobrem o jogo, e com "fechar" */
+@media (hover:none) and (pointer:coarse){
+  #fact-banner{top:6px;max-width:86%;padding:6px 12px;font-size:12px;line-height:1.28;border-radius:11px;}
+  #fact-banner .fb-tag{font-size:.72em;margin-bottom:2px;}
+  #fact-banner .fb-close{display:block;margin-top:5px;font-size:.78em;color:#aab0bd;font-weight:600;}
+  #tutorial-hint{bottom:8px;top:auto;font-size:11px;padding:5px 12px;max-width:56%;}
 }
 
 /* ---------------- Telas genéricas ---------------- */

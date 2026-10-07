@@ -102,7 +102,7 @@ const CONQUISTAS = {
 const CHEFES = {
   fome:         { nome: "A FOME",               emoji: "🍽️", cor: "#6b4a2a", hp: 3, kind: "blob" },
   desmonte:     { nome: "O DESMONTE",           emoji: "🏚️", cor: "#5a6472", hp: 3, kind: "blob" },
-  desigualdade: { nome: "A DESIGUALDADE",       emoji: "⚖️", cor: "#7a5a86", hp: 4, kind: "blob" },
+  desigualdade: { nome: "O CAPITÃO DO ATRASO",  emoji: "🪖", cor: "#2e3b33", hp: 4, kind: "captain" },
   democracia:   { nome: "O MAGNATA ESTRANGEIRO", emoji: "💵", cor: "#1b2a4a", hp: 5, kind: "tycoon" }
 };
 
