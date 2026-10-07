@@ -980,123 +980,201 @@ function drawTycoonBoss(b,cx,cy,bob,def,flash){
 function drawPlayer(){
   const p=player;
   if(p.invuln>0 && Math.floor(p.t/4)%2===0 && deathTimer===0 && levelClearTimer===0) return;
-  const walking=p.onGround && Math.abs(p.vx)>0.4;
-  const swing=walking?Math.sin(p.t*0.3):0;
-  drawHero(ctx, p.x+p.w/2, p.y, p.h, p.skin, p.facing, p.onGround?(walking?"walk":"idle"):"jump", swing);
+  const dying = deathTimer>0;
+  const walking = p.onGround && Math.abs(p.vx)>0.4;
+  const swing = walking ? Math.sin(p.t*0.3) : 0;
+  let state = p.onGround ? (walking?"walk":"idle") : "jump";
+  if(dying) state = "dead";
+  // tremidinha estilo Mario nos primeiros quadros da morte
+  const shake = (dying && deathTimer>40) ? Math.sin(p.t*1.7)*4 : 0;
+  drawHero(ctx, p.x+p.w/2+shake, p.y, p.h, p.skin, p.facing, state, swing, p.t);
 }
-/* Desenha o Lula. skin: 'red' (camiseta+boné), 'suit' (terno), 'hat' (chapéu).
-   cx = centro X, topY = topo, H = altura total. */
-function drawHero(c, cx, topY, H, skin, facing, state, swing){
-  const W=H*0.76, y=topY, air=(state==="jump");
-  const skinC="#e3ac81", skinD="#cf9568";
-  let shirt="#e11021", shirtD="#b60d1a", pants="#27407d", bare=true, hat="cap", buff=false;
-  let hairC="#d8d8dd", beardC="#d3d3d9", browC="#cfcfd4";
-  if(skin==="suit"){ shirt="#71767f"; shirtD="#585d67"; pants="#565b65"; bare=false; hat=null; }
-  if(skin==="hat"){  shirt="#f2eee2"; shirtD="#d9d3c2"; pants="#c7bb9c"; bare=false; hat="panama"; }
-  if(skin==="forte"){ shirt="#e11021"; shirtD="#b60d1a"; pants="#2a2d3a"; bare=true; hat=null; buff=true;
-                      hairC="#ffffff"; beardC="#f6f6f8"; browC="#ffffff"; }
+/* Desenha o Lula — caricato e reconhecível (cabelo + barba grisalhos SEMPRE).
+   skin: 'red' (camiseta+boné), 'suit' (terno), 'hat' (chapéu), 'forte' (bombado).
+   state: 'idle' | 'walk' | 'jump' | 'dead'.  tick: contador p/ animação (respirada). */
+function drawHero(c, cx, topY, H, skin, facing, state, swing, tick){
+  const t = tick||0;
+  const W=H*0.72, y=topY;
+  const air=(state==="jump"), dead=(state==="dead");
+  const breath = (state==="idle") ? Math.sin(t*0.09)*1.6 : 0;   // respirada parado
+
+  const skinC="#e7b184", skinD="#cf9568", skinL="#f2c79e";
+  let shirt="#e11021", shirtD="#b00d1a", pants="#2a4487", bare=true, hat="cap", buff=false;
+  let hairC="#dcdce1", hairD="#b7b7bf", beardC="#e2e2e7";
+  if(skin==="suit"){ shirt="#6e737d"; shirtD="#565b65"; pants="#4f535d"; bare=false; hat=null; }
+  if(skin==="hat"){  shirt="#f4f0e4"; shirtD="#dcd6c4"; pants="#c7bb9c"; bare=false; hat="panama"; }
+  if(skin==="forte"){ shirt="#e11021"; shirtD="#b00d1a"; pants="#2a2d3a"; bare=true; hat=null; buff=true;
+                      hairC="#ffffff"; hairD="#e2e2e8"; beardC="#f7f7fa"; }
 
   c.save();
   c.translate(cx,y); c.scale(facing,1); c.translate(-cx,-y);
+  if(dead){ c.translate(cx,y+H*0.5); c.rotate(0.16); c.translate(-cx,-(y+H*0.5)); } // tomba
 
-  // sombra
-  c.fillStyle="rgba(0,0,0,.18)"; c.beginPath(); c.ellipse(cx,y+H,W*0.5,6,0,0,7); c.fill();
+  // sombra (some ao morrer)
+  if(!dead){ c.fillStyle="rgba(0,0,0,.2)"; c.beginPath(); c.ellipse(cx,y+H,W*0.5,6,0,0,7); c.fill(); }
 
-  // pernas
-  const legTop=y+H*0.63, legH=H*0.31, lw=W*0.2;
+  // ---------- pernas ----------
+  const legTop=y+H*0.64, legH=H*0.30, lw=W*0.22;
   c.fillStyle=pants;
-  if(air){ c.fillRect(cx-W*0.24,legTop,lw,legH*0.85); c.fillRect(cx+W*0.05,legTop-H*0.04,lw,legH*0.85); }
-  else { c.fillRect(cx-W*0.24,legTop,lw,legH-swing*3); c.fillRect(cx+W*0.05,legTop,lw,legH+swing*3); }
-  // sapatos
-  c.fillStyle="#1a1a1f";
-  c.fillRect(cx-W*0.27,y+H-H*0.08,lw+W*0.05,H*0.08);
-  c.fillRect(cx+W*0.03,y+H-H*0.08,lw+W*0.05,H*0.08);
+  if(air||dead){ // recolhidas
+    c.save(); c.translate(cx,legTop); c.rotate(-0.28); c.fillRect(-W*0.27,0,lw,legH*0.82);
+      c.fillStyle="#17171c"; roundRect(c,-W*0.3,legH*0.74,lw+W*0.06,H*0.07,3); c.fill(); c.restore();
+    c.fillStyle=pants;
+    c.save(); c.translate(cx,legTop); c.rotate(0.32); c.fillRect(W*0.05,0,lw,legH*0.82);
+      c.fillStyle="#17171c"; roundRect(c,W*0.02,legH*0.74,lw+W*0.06,H*0.07,3); c.fill(); c.restore();
+  } else {
+    c.fillRect(cx-W*0.26,legTop,lw,legH-swing*3);
+    c.fillRect(cx+W*0.04,legTop,lw,legH+swing*3);
+    c.fillStyle="#17171c";
+    roundRect(c,cx-W*0.29,y+H-H*0.075,lw+W*0.06,H*0.075,3); c.fill();
+    roundRect(c,cx+W*0.02,y+H-H*0.075,lw+W*0.06,H*0.075,3); c.fill();
+  }
 
-  // tronco (mais largo se for o Fortão)
-  const tY=y+H*0.3, tH=H*0.37, tW=W*(buff?0.82:0.62);
-  c.fillStyle=shirt; roundRect(c,cx-tW/2,tY,tW,tH,buff?10:6); c.fill();
-  c.fillStyle=shirtD; roundRect(c,cx-tW/2,tY+tH*0.55,tW,tH*0.45,buff?10:6); c.fill();
-  roundRect(c,cx-tW/2,tY,tW,tH,buff?10:6); c.strokeStyle="rgba(0,0,0,.22)"; c.lineWidth=2; c.stroke(); c.lineWidth=1; // contorno
-  if(buff){ // peitoral marcado
-    c.strokeStyle=shirtD; c.lineWidth=2;
-    c.beginPath(); c.moveTo(cx,tY+tH*0.12); c.lineTo(cx,tY+tH*0.5); c.stroke();
-    c.beginPath(); c.arc(cx-tW*0.2,tY+tH*0.2,tW*0.16,0.2,1.2); c.arc(cx+tW*0.2,tY+tH*0.2,tW*0.16,Math.PI-1.2,Math.PI-0.2); c.stroke();
+  // ---------- tronco ----------
+  const tY=y+H*0.34-breath*0.3, tH=H*0.33+breath*0.3, tW=W*(buff?0.84:0.6);
+  c.fillStyle=shirt; roundRect(c,cx-tW/2,tY,tW,tH,buff?12:8); c.fill();
+  c.fillStyle=shirtD; roundRect(c,cx-tW/2,tY+tH*0.58,tW,tH*0.42,buff?12:8); c.fill();
+  roundRect(c,cx-tW/2,tY,tW,tH,buff?12:8); c.strokeStyle="rgba(0,0,0,.25)"; c.lineWidth=2.4; c.stroke(); c.lineWidth=1;
+  if(buff){
+    c.strokeStyle=shirtD; c.lineWidth=2.4;
+    c.beginPath(); c.moveTo(cx,tY+tH*0.14); c.lineTo(cx,tY+tH*0.52); c.stroke();
+    c.beginPath(); c.arc(cx-tW*0.2,tY+tH*0.22,tW*0.16,0.2,1.2); c.arc(cx+tW*0.2,tY+tH*0.22,tW*0.16,Math.PI-1.2,Math.PI-0.2); c.stroke();
     c.lineWidth=1;
   }
 
-  // braços (manga + antebraço + mão) — maiores e musculosos no Fortão
-  const aUp=H*(buff?0.19:0.17), aLo=H*(buff?0.17:0.14), aw=W*(buff?0.2:0.14), upY=tY+2;
-  for(const side of [-1,1]){
-    const ax = side<0 ? cx-tW/2-aw+2 : cx+tW/2-2;
-    const sgn = air ? (side<0?1:-1)*0.5 : (side<0?-swing:swing);
+  // ---------- braços ----------
+  const aUp=H*(buff?0.2:0.17), aLo=H*(buff?0.17:0.14), aw=W*(buff?0.22:0.15), upY=tY+3;
+  function arm(side){
+    const ax = side<0 ? cx-tW/2-aw+3 : cx+tW/2-3;
+    if(air||dead){ // erguidos em V (festejo no pulo / "ó!" da morte)
+      c.save(); c.translate(ax+aw/2, upY+2); c.rotate(side*(air?-0.95:-1.2));
+      c.fillStyle=buff?skinC:shirt; c.fillRect(-aw/2,0,aw,aUp);
+      c.fillStyle=(bare||buff)?skinC:shirt; c.fillRect(-aw/2,aUp,aw,aLo);
+      c.fillStyle=skinC; c.beginPath(); c.arc(0,aUp+aLo,aw*0.52,0,7); c.fill();
+      c.restore(); return;
+    }
+    const sgn = side<0?-swing:swing;
     if(buff){
-      // bíceps avantajado
       c.fillStyle=skinC; c.beginPath(); c.ellipse(ax+aw/2, upY+aUp*0.5, aw*0.62, aUp*0.72, 0, 0, 7); c.fill();
       c.fillStyle=skinD; c.beginPath(); c.arc(ax+aw*(side<0?0.3:0.7), upY+aUp*0.5, aw*0.22, 0, 7); c.fill();
       c.fillStyle=skinC; c.fillRect(ax+aw*0.1, upY+aUp, aw*0.8, aLo+sgn*3);
-      c.fillStyle=skinC; c.beginPath(); c.arc(ax+aw/2, upY+aUp+aLo+sgn*3, aw*0.42, 0, 7); c.fill(); // punho
+      c.fillStyle=skinC; c.beginPath(); c.arc(ax+aw/2, upY+aUp+aLo+sgn*3, aw*0.42, 0, 7); c.fill();
     } else {
       c.fillStyle=shirt; c.fillRect(ax,upY,aw,aUp);
       c.fillStyle=bare?skinC:shirt; c.fillRect(ax,upY+aUp,aw,aLo+sgn*3);
-      c.fillStyle=skinC; c.fillRect(ax,upY+aUp+aLo+sgn*3,aw,H*0.055);
+      c.fillStyle=skinC; c.beginPath(); c.arc(ax+aw/2,upY+aUp+aLo+sgn*3+H*0.01,aw*0.55,0,7); c.fill();
     }
   }
-  if(buff){ // alças da regata vermelha
-    c.fillStyle=shirt;
-    c.fillRect(cx-tW*0.34, tY, tW*0.16, tH*0.3);
-    c.fillRect(cx+tW*0.18, tY, tW*0.16, tH*0.3);
-  }
+  arm(-1); arm(1);
+  if(buff){ c.fillStyle=shirt; c.fillRect(cx-tW*0.34,tY,tW*0.16,tH*0.3); c.fillRect(cx+tW*0.18,tY,tW*0.16,tH*0.3); }
 
-  // detalhes da roupa
+  // detalhes de roupa
   if(skin==="suit"){
-    c.fillStyle="#f4f4f0"; c.beginPath(); c.moveTo(cx-tW*0.17,tY); c.lineTo(cx,tY+tH*0.48); c.lineTo(cx+tW*0.17,tY); c.closePath(); c.fill();
+    c.fillStyle="#f6f6f2"; c.beginPath(); c.moveTo(cx-tW*0.18,tY); c.lineTo(cx,tY+tH*0.5); c.lineTo(cx+tW*0.18,tY); c.closePath(); c.fill();
     c.fillStyle=shirtD;
-    c.beginPath(); c.moveTo(cx-tW*0.2,tY); c.lineTo(cx-tW*0.01,tY+tH*0.3); c.lineTo(cx-tW*0.01,tY); c.closePath(); c.fill();
-    c.beginPath(); c.moveTo(cx+tW*0.2,tY); c.lineTo(cx+tW*0.01,tY+tH*0.3); c.lineTo(cx+tW*0.01,tY); c.closePath(); c.fill();
-    c.fillStyle="#d11a2a"; c.beginPath(); c.moveTo(cx-3,tY+tH*0.05); c.lineTo(cx+3,tY+tH*0.05); c.lineTo(cx+5,tY+tH*0.5); c.lineTo(cx,tY+tH*0.57); c.lineTo(cx-5,tY+tH*0.5); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(cx-tW*0.22,tY); c.lineTo(cx-tW*0.01,tY+tH*0.32); c.lineTo(cx-tW*0.01,tY); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(cx+tW*0.22,tY); c.lineTo(cx+tW*0.01,tY+tH*0.32); c.lineTo(cx+tW*0.01,tY); c.closePath(); c.fill();
+    c.fillStyle="#d11a2a"; c.beginPath(); c.moveTo(cx-4,tY+tH*0.06); c.lineTo(cx+4,tY+tH*0.06); c.lineTo(cx+6,tY+tH*0.52); c.lineTo(cx,tY+tH*0.6); c.lineTo(cx-6,tY+tH*0.52); c.closePath(); c.fill();
   } else if(skin==="hat"){
-    c.fillStyle=shirtD; c.beginPath(); c.moveTo(cx-tW*0.15,tY); c.lineTo(cx,tY+tH*0.18); c.lineTo(cx+tW*0.15,tY); c.closePath(); c.fill();
-    c.fillStyle="#cfc8b4"; for(let i=0;i<3;i++) c.fillRect(cx-1,tY+tH*0.26+i*tH*0.18,2,4);
-  } else {
-    c.fillStyle=shirtD; c.beginPath(); c.ellipse(cx,tY+2,tW*0.17,4,0,0,7); c.fill();
+    c.fillStyle=shirtD; c.beginPath(); c.moveTo(cx-tW*0.16,tY); c.lineTo(cx,tY+tH*0.2); c.lineTo(cx+tW*0.16,tY); c.closePath(); c.fill();
+    c.fillStyle="#cfc8b4"; for(let i=0;i<3;i++) c.fillRect(cx-1,tY+tH*0.28+i*tH*0.18,2,4);
+  } else if(!buff){
+    c.fillStyle=shirtD; c.beginPath(); c.ellipse(cx,tY+3,tW*0.18,5,0,0,7); c.fill();
   }
 
-  // cabeça
-  const hw=W*0.52, hh=H*0.3, hx=cx, hy=y+H*0.01;
-  c.fillStyle=skinC; c.beginPath(); c.arc(hx+hw*0.45,hy+hh*0.56,hw*0.13,0,7); c.fill(); // orelha
-  c.fillStyle=skinC; roundRect(c,hx-hw/2,hy+hh*0.06,hw,hh*0.94,hw*0.32); c.fill();
-  c.fillStyle=skinD; roundRect(c,hx-hw/2,hy+hh*0.06,hw*0.26,hh*0.94,hw*0.32); c.fill(); // sombra lateral
-  roundRect(c,hx-hw/2,hy+hh*0.06,hw,hh*0.94,hw*0.32); c.strokeStyle="rgba(0,0,0,.16)"; c.lineWidth=1.8; c.stroke(); c.lineWidth=1; // contorno
-  // cabelo grisalho (branco no Fortão)
-  c.fillStyle=hairC;
-  c.beginPath(); c.arc(hx,hy+hh*0.3,hw*0.55,Math.PI,0); c.fill();
-  c.fillRect(hx-hw*0.55,hy+hh*0.3,hw*0.12,hh*0.42); c.fillRect(hx+hw*0.43,hy+hh*0.3,hw*0.12,hh*0.36);
-  // barba + bigode
-  c.fillStyle=beardC;
-  c.beginPath(); c.moveTo(hx-hw*0.46,hy+hh*0.52); c.quadraticCurveTo(hx,hy+hh*1.14,hx+hw*0.46,hy+hh*0.52);
-  c.lineTo(hx+hw*0.46,hy+hh*0.64); c.quadraticCurveTo(hx,hy+hh*0.96,hx-hw*0.46,hy+hh*0.64); c.closePath(); c.fill();
-  c.fillRect(hx-hw*0.24,hy+hh*0.56,hw*0.48,hh*0.08); // bigode
-  // olhos
-  c.fillStyle="#fff"; c.beginPath(); c.arc(hx-hw*0.16,hy+hh*0.45,hw*0.1,0,7); c.arc(hx+hw*0.16,hy+hh*0.45,hw*0.1,0,7); c.fill();
-  c.fillStyle="#2a2320"; c.beginPath(); c.arc(hx-hw*0.13,hy+hh*0.46,hw*0.05,0,7); c.arc(hx+hw*0.19,hy+hh*0.46,hw*0.05,0,7); c.fill();
-  // sobrancelhas
-  c.strokeStyle=browC; c.lineWidth=2.5;
-  c.beginPath(); c.moveTo(hx-hw*0.27,hy+hh*0.34); c.lineTo(hx-hw*0.05,hy+hh*0.37);
-  c.moveTo(hx+hw*0.05,hy+hh*0.37); c.lineTo(hx+hw*0.27,hy+hh*0.34); c.stroke();
-  // sorriso
-  c.strokeStyle="#9a6a46"; c.lineWidth=2; c.beginPath(); c.arc(hx,hy+hh*0.72,hw*0.15,0.2,Math.PI-0.2); c.stroke(); c.lineWidth=1;
+  // ================= CABEÇA (grande e caricata) =================
+  const hh=H*0.38, hw=W*0.64, hx=cx, hy=y-H*0.02+breath*0.6;
+  // pescoço
+  c.fillStyle=skinD; c.fillRect(hx-W*0.1, hy+hh*0.82, W*0.2, H*0.06);
+  // orelhas
+  c.fillStyle=skinC; c.beginPath(); c.arc(hx-hw*0.5,hy+hh*0.52,hw*0.12,0,7); c.arc(hx+hw*0.5,hy+hh*0.52,hw*0.12,0,7); c.fill();
+  // rosto
+  c.fillStyle=skinC; roundRect(c,hx-hw/2,hy+hh*0.04,hw,hh*0.92,hw*0.4); c.fill();
+  c.fillStyle=skinL; roundRect(c,hx-hw*0.42,hy+hh*0.08,hw*0.48,hh*0.5,hw*0.3); c.fill();   // luz
+  c.fillStyle=skinD; roundRect(c,hx+hw*0.2,hy+hh*0.1,hw*0.28,hh*0.78,hw*0.3); c.fill();     // sombra
+  roundRect(c,hx-hw/2,hy+hh*0.04,hw,hh*0.92,hw*0.4); c.strokeStyle="rgba(0,0,0,.2)"; c.lineWidth=2; c.stroke(); c.lineWidth=1;
 
-  // chapéu / boné
+  // CABELO grisalho — cheio, jogado pra trás
+  c.fillStyle=hairC;
+  c.beginPath();
+  c.moveTo(hx-hw*0.56,hy+hh*0.5);
+  c.quadraticCurveTo(hx-hw*0.62,hy-hh*0.12,hx-hw*0.06,hy-hh*0.08);
+  c.quadraticCurveTo(hx+hw*0.32,hy-hh*0.14,hx+hw*0.6,hy+hh*0.18);
+  c.quadraticCurveTo(hx+hw*0.5,hy+hh*0.06,hx+hw*0.2,hy+hh*0.03);
+  c.quadraticCurveTo(hx-hw*0.1,hy+hh*0.02,hx-hw*0.34,hy+hh*0.2);
+  c.quadraticCurveTo(hx-hw*0.5,hy+hh*0.34,hx-hw*0.56,hy+hh*0.5);
+  c.closePath(); c.fill();
+  c.fillStyle=hairD; // mechas
+  c.beginPath(); c.moveTo(hx-hw*0.5,hy+hh*0.42); c.quadraticCurveTo(hx-hw*0.2,hy+hh*0.06,hx+hw*0.12,hy+hh*0.08);
+  c.lineTo(hx+hw*0.12,hy+hh*0.15); c.quadraticCurveTo(hx-hw*0.2,hy+hh*0.14,hx-hw*0.46,hy+hh*0.5); c.closePath(); c.fill();
+  // costeletas ligam cabelo à barba
+  c.fillStyle=hairC; c.fillRect(hx-hw*0.52,hy+hh*0.4,hw*0.1,hh*0.22); c.fillRect(hx+hw*0.42,hy+hh*0.4,hw*0.1,hh*0.22);
+
+  // SOBRANCELHAS grossas grisalhas
+  c.strokeStyle=hairD; c.lineWidth=hw*0.11; c.lineCap="round";
+  c.beginPath(); c.moveTo(hx-hw*0.3,hy+hh*0.4); c.lineTo(hx-hw*0.06,hy+hh*0.42);
+  c.moveTo(hx+hw*0.06,hy+hh*0.42); c.lineTo(hx+hw*0.3,hy+hh*0.4); c.stroke();
+  c.lineWidth=1; c.lineCap="butt";
+
+  // OLHOS
+  if(dead){
+    c.strokeStyle="#2a2320"; c.lineWidth=hw*0.07; c.lineCap="round";
+    for(const ex of [-0.17,0.17]){ const X=hx+hw*ex, Y=hy+hh*0.5, r=hw*0.09;
+      c.beginPath(); c.moveTo(X-r,Y-r); c.lineTo(X+r,Y+r); c.moveTo(X+r,Y-r); c.lineTo(X-r,Y+r); c.stroke(); }
+    c.lineWidth=1; c.lineCap="butt";
+  } else {
+    c.fillStyle="#fff"; c.beginPath(); c.ellipse(hx-hw*0.17,hy+hh*0.5,hw*0.11,hw*0.12,0,0,7); c.ellipse(hx+hw*0.17,hy+hh*0.5,hw*0.11,hw*0.12,0,0,7); c.fill();
+    c.fillStyle="#3a2d24"; c.beginPath(); c.arc(hx-hw*0.14,hy+hh*0.51,hw*0.055,0,7); c.arc(hx+hw*0.2,hy+hh*0.51,hw*0.055,0,7); c.fill();
+  }
+
+  // NARIZ
+  c.fillStyle=skinD; c.beginPath(); c.ellipse(hx+hw*0.03,hy+hh*0.6,hw*0.1,hw*0.085,0,0,7); c.fill();
+  c.fillStyle=skinC; c.beginPath(); c.ellipse(hx,hy+hh*0.57,hw*0.08,hw*0.07,0,0,7); c.fill();
+
+  // BOCHECHAS rosadas
+  c.fillStyle="rgba(214,110,90,.26)"; c.beginPath(); c.arc(hx-hw*0.28,hy+hh*0.64,hw*0.1,0,7); c.arc(hx+hw*0.28,hy+hh*0.64,hw*0.09,0,7); c.fill();
+
+  // BARBA grisalha cheia (a marca do Lula)
+  c.fillStyle=beardC;
+  c.beginPath();
+  c.moveTo(hx-hw*0.5,hy+hh*0.56);
+  c.quadraticCurveTo(hx-hw*0.52,hy+hh*0.98,hx-hw*0.22,hy+hh*1.1);
+  c.quadraticCurveTo(hx,hy+hh*1.22,hx+hw*0.22,hy+hh*1.1);
+  c.quadraticCurveTo(hx+hw*0.52,hy+hh*0.98,hx+hw*0.5,hy+hh*0.56);
+  c.quadraticCurveTo(hx+hw*0.3,hy+hh*0.74,hx+hw*0.14,hy+hh*0.67);
+  c.quadraticCurveTo(hx,hy+hh*0.71,hx-hw*0.14,hy+hh*0.67);
+  c.quadraticCurveTo(hx-hw*0.3,hy+hh*0.74,hx-hw*0.5,hy+hh*0.56);
+  c.closePath(); c.fill();
+  c.strokeStyle=hairD; c.lineWidth=1.2; c.globalAlpha=.45; // textura
+  for(let i=-2;i<=2;i++){ c.beginPath(); c.moveTo(hx+hw*0.12*i,hy+hh*0.8); c.lineTo(hx+hw*0.12*i,hy+hh*1.04); c.stroke(); }
+  c.globalAlpha=1; c.lineWidth=1;
+  // BIGODE
+  c.fillStyle=beardC; c.beginPath();
+  c.moveTo(hx-hw*0.27,hy+hh*0.6); c.quadraticCurveTo(hx,hy+hh*0.56,hx+hw*0.27,hy+hh*0.6);
+  c.quadraticCurveTo(hx+hw*0.14,hy+hh*0.73,hx,hy+hh*0.69);
+  c.quadraticCurveTo(hx-hw*0.14,hy+hh*0.73,hx-hw*0.27,hy+hh*0.6); c.closePath(); c.fill();
+
+  // BOCA / sorriso
+  if(dead){
+    c.fillStyle="#6b4a34"; c.beginPath(); c.ellipse(hx,hy+hh*0.76,hw*0.09,hw*0.07,0,0,7); c.fill();
+  } else {
+    c.strokeStyle="#8a5438"; c.lineWidth=2.4; c.lineCap="round";
+    c.beginPath(); c.arc(hx,hy+hh*0.66,hw*0.17,0.18,Math.PI-0.18); c.stroke();
+    c.fillStyle="#fff"; c.fillRect(hx-hw*0.11,hy+hh*0.68,hw*0.22,hh*0.04);
+    c.lineWidth=1; c.lineCap="butt";
+  }
+
+  // ---------- chapéu / boné ----------
   if(hat==="cap"){
-    c.fillStyle="#e11021"; c.beginPath(); c.arc(hx,hy+hh*0.26,hw*0.57,Math.PI,0); c.fill();
-    c.fillRect(hx-hw*0.57,hy+hh*0.22,hw*1.14,hh*0.1);
-    c.fillStyle="#b60d1a"; c.beginPath(); c.ellipse(hx+hw*0.42,hy+hh*0.3,hw*0.5,hh*0.11,0,0,Math.PI); c.fill();
-    c.fillStyle="#fff"; c.beginPath(); c.arc(hx,hy+hh*0.06,hw*0.07,0,7); c.fill();
+    c.fillStyle="#e11021"; c.beginPath(); c.arc(hx,hy+hh*0.2,hw*0.6,Math.PI,0); c.fill();
+    c.fillStyle="#b00d1a"; c.fillRect(hx-hw*0.6,hy+hh*0.16,hw*1.2,hh*0.1);
+    c.fillStyle="#c20f1d"; c.beginPath(); c.ellipse(hx+hw*0.42,hy+hh*0.24,hw*0.52,hh*0.1,0,0,Math.PI); c.fill();
+    c.fillStyle="#fff"; c.beginPath(); c.arc(hx-hw*0.04,hy+hh*0.02,hw*0.09,0,7); c.fill(); // emblema
   } else if(hat==="panama"){
-    c.fillStyle="#f0e5c2"; c.beginPath(); c.ellipse(hx,hy+hh*0.28,hw*0.74,hh*0.13,0,0,7); c.fill();
-    c.fillStyle="#f5ecce"; c.beginPath(); c.ellipse(hx,hy+hh*0.12,hw*0.44,hh*0.22,0,Math.PI,0); c.fill();
-    c.fillRect(hx-hw*0.44,hy+hh*0.1,hw*0.88,hh*0.14);
-    c.fillStyle="#3a3a40"; c.fillRect(hx-hw*0.44,hy+hh*0.2,hw*0.88,hh*0.05);
+    c.fillStyle="#efe2bb"; c.beginPath(); c.ellipse(hx,hy+hh*0.2,hw*0.78,hh*0.12,0,0,7); c.fill();
+    c.fillStyle="#f5ecce"; c.beginPath(); c.ellipse(hx,hy+hh*0.02,hw*0.46,hh*0.24,0,Math.PI,0); c.fill();
+    c.fillRect(hx-hw*0.46,hy,hw*0.92,hh*0.16);
+    c.fillStyle="#3a3a40"; c.fillRect(hx-hw*0.46,hy+hh*0.11,hw*0.92,hh*0.05);
   }
 
   c.restore();
@@ -1178,7 +1256,7 @@ function drawMap(){
   if (np) {
     const hero = HEROIS.find(h=>h.id===selectedChar) || HEROIS[0];
     const hop = Math.abs(Math.sin(bgT*0.12))*6;
-    drawHero(ctx, np.x, np.y - 30 - 54 - hop, 54, hero.skin, 1, "idle", 0);
+    drawHero(ctx, np.x, np.y - 30 - 54 - hop, 54, hero.skin, 1, "idle", 0, bgT);
   }
 }
 function handleMapClick(clientX, clientY){
@@ -1240,6 +1318,7 @@ if (typeof location!=="undefined" && location.search.indexOf("slwtest")!==-1){
     get completed(){return completed;}, get deeds(){return collectedDeeds;},
     setPos(x,y){player.x=x;player.y=y;player.vx=0;player.vy=0;},
     goLevel(i){enterLevel(i);}, startPlay(){startLevelPlay();},
+    get camx(){return cam.x;}, kill(){die();},
     bossPos(){return boss?{x:boss.x,y:boss.y}:null;} };
 }
 
