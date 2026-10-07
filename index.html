@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Super Lula World</title>
-<meta name="description" content="Super Lula World — um jogo de plataforma tributo às realizações do governo Lula. Corra, pule e colete os bons feitos!">
+<meta name="description" content="Super Lula World — jogo de plataforma didático e tributo às conquistas do povo brasileiro. Enfrente as forças do atraso e reconstrua o Brasil!">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
@@ -13,18 +13,28 @@
 <body>
 <div id="game-shell">
 
-  <!-- Área do jogo -->
-  <canvas id="game" width="912" height="528"></canvas>
+  <canvas id="game" width="1280" height="704"></canvas>
 
   <!-- HUD -->
   <div id="hud" class="hidden">
     <div class="hud-item"><span class="hud-ico">❤️</span><span id="hud-vidas">3</span></div>
     <div class="hud-item"><span class="hud-ico">🗳️</span><span id="hud-votos">0</span></div>
-    <div class="hud-item"><span class="hud-ico">⭐</span><span id="hud-feitos">0</span>/<span id="hud-feitos-total">12</span></div>
-    <div class="hud-item hud-fase"><span id="hud-fase">Fase 1</span></div>
+    <div class="hud-item"><span class="hud-ico">⭐</span><span id="hud-feitos">0</span>/<span id="hud-feitos-total">11</span></div>
+    <div class="hud-spacer"></div>
+    <button id="btn-music" class="hud-btn" title="Música">🔊</button>
+    <button id="btn-pause" class="hud-btn" title="Pausar">⏸</button>
   </div>
 
-  <!-- Controles touch (mobile) -->
+  <!-- Barra do chefão -->
+  <div id="boss-bar" class="hidden">
+    <div class="boss-name"><span id="boss-emoji">🍽️</span> <span id="boss-label">A FOME</span></div>
+    <div class="boss-hp"><div id="boss-hp-fill"></div></div>
+  </div>
+
+  <!-- Dica de tutorial flutuante -->
+  <div id="tutorial-hint" class="hidden"></div>
+
+  <!-- Controles touch -->
   <div id="touch-controls" class="hidden">
     <div class="touch-left">
       <button class="tbtn" data-key="left" aria-label="Esquerda">◀</button>
@@ -35,14 +45,37 @@
     </div>
   </div>
 
-  <!-- TELA: Menu inicial -->
+  <!-- TELA: Menu -->
   <div id="screen-menu" class="screen">
     <div class="menu-box">
       <h1 class="logo">SUPER<br><span class="logo-lula">LULA</span><br>WORLD</h1>
-      <p class="tagline">Corra pelo Brasil, derrote os perrengues<br>e colete os <b>bons feitos</b>! 🌟</p>
-      <button id="btn-start" class="big-btn">▶ JOGAR</button>
+      <p class="tagline">A jornada para reconstruir o Brasil 🇧🇷</p>
+      <button id="btn-start" class="big-btn">▶ COMEÇAR</button>
       <button id="btn-help" class="ghost-btn">Como jogar</button>
-      <p class="credits">Um tributo em forma de joguinho 🇧🇷</p>
+      <p class="credits">Um tributo didático em forma de joguinho</p>
+    </div>
+  </div>
+
+  <!-- TELA: Introdução (história) -->
+  <div id="screen-intro" class="screen hidden">
+    <div class="intro-box">
+      <div class="intro-art" id="intro-art"></div>
+      <h2 id="intro-titulo">—</h2>
+      <p class="intro-texto" id="intro-texto">—</p>
+      <div class="intro-dots" id="intro-dots"></div>
+      <div class="intro-nav">
+        <button id="btn-intro-skip" class="ghost-btn">Pular introdução</button>
+        <button id="btn-intro-next" class="big-btn inline">Avançar ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA: Seleção de personagem -->
+  <div id="screen-char" class="screen hidden">
+    <div class="menu-box char-box">
+      <h2>Escolha quem vai liderar</h2>
+      <div id="char-list" class="char-list"></div>
+      <button id="btn-char-go" class="big-btn">Ir para o mapa ▶</button>
     </div>
   </div>
 
@@ -51,35 +84,66 @@
     <div class="menu-box">
       <h2>Como jogar</h2>
       <ul class="help-list">
-        <li><b>◀ ▶</b> ou <b>A / D</b> — andar</li>
-        <li><b>Espaço</b>, <b>W</b>, <b>↑</b> ou <b>Z</b> — pular (segure para pular mais alto)</li>
-        <li>🗳️ Colete <b>votos</b> para pontos</li>
-        <li>⭐ Pegue as <b>estrelas</b> para desbloquear um <b>bom feito</b></li>
-        <li>Pule na cabeça dos <b>perrengues</b> para derrotá-los</li>
-        <li>Fuja dos <b>espinhos</b> e não caia nos buracos!</li>
-        <li>Chegue na <b>bandeira</b> 🚩 pra vencer a fase</li>
+        <li><b>◀ ▶</b> / <b>A D</b> — andar</li>
+        <li><b>Espaço</b> / <b>W</b> / <b>↑</b> — pular (segure p/ pular mais alto)</li>
+        <li>Pule na <b>cabeça</b> dos vilões para derrotá-los</li>
+        <li>🗳️ Pegue <b>votos</b> para pontos</li>
+        <li>Desvie das <b>poças de desinformação</b> 💬</li>
+        <li>No fim da fase, enfrente o <b>CHEFÃO</b> (as forças do atraso)</li>
+        <li>Vença o chefão e <b>desbloqueie conquistas</b> ⭐</li>
       </ul>
       <button id="btn-help-back" class="big-btn">Voltar</button>
     </div>
   </div>
 
-  <!-- TELA: Pop-up de "bom feito" -->
-  <div id="screen-feito" class="screen hidden">
-    <div class="feito-box">
-      <div class="feito-emoji" id="feito-emoji">🧡</div>
-      <div class="feito-tag">BOM FEITO DESBLOQUEADO!</div>
-      <h2 class="feito-nome" id="feito-nome">—</h2>
-      <p class="feito-texto" id="feito-texto">—</p>
-      <button id="btn-feito-ok" class="big-btn">Seguir! ▶</button>
+  <!-- TELA: Mapa do Brasil -->
+  <div id="screen-map" class="screen hidden map-screen">
+    <div class="map-top">
+      <h2>Mapa do Brasil</h2>
+      <p id="map-sub">Escolha a próxima fase</p>
+    </div>
+    <!-- os nós são desenhados no canvas; cliques tratados em JS -->
+    <div id="map-start-hint" class="map-hint">Toque na fase que está <b>brilhando</b> 👇</div>
+  </div>
+
+  <!-- TELA: Missão da fase -->
+  <div id="screen-missao" class="screen hidden">
+    <div class="menu-box">
+      <div class="missao-badge" id="missao-badge">FASE 1</div>
+      <h2 id="missao-titulo">—</h2>
+      <p class="intro-texto" id="missao-texto">—</p>
+      <div class="missao-chefe">Chefão: <b id="missao-chefe">—</b></div>
+      <button id="btn-missao-go" class="big-btn">Começar fase ▶</button>
     </div>
   </div>
 
-  <!-- TELA: Fim de fase -->
+  <!-- TELA: Pausa -->
+  <div id="screen-pause" class="screen hidden">
+    <div class="menu-box">
+      <h2>Pausa</h2>
+      <button id="btn-resume" class="big-btn">Continuar ▶</button>
+      <button id="btn-pause-map" class="ghost-btn">Voltar ao mapa</button>
+      <button id="btn-pause-menu" class="ghost-btn">Menu principal</button>
+    </div>
+  </div>
+
+  <!-- TELA: Conquista desbloqueada -->
+  <div id="screen-feito" class="screen hidden">
+    <div class="feito-box">
+      <div class="feito-emoji" id="feito-emoji">🧡</div>
+      <div class="feito-tag">CONQUISTA DESBLOQUEADA!</div>
+      <h2 class="feito-nome" id="feito-nome">—</h2>
+      <p class="feito-texto" id="feito-texto">—</p>
+      <button id="btn-feito-ok" class="big-btn">Continuar ▶</button>
+    </div>
+  </div>
+
+  <!-- TELA: Fase concluída -->
   <div id="screen-fase" class="screen hidden">
     <div class="menu-box">
-      <h2 id="fase-titulo">Fase completa!</h2>
+      <h2 id="fase-titulo">Fase concluída!</h2>
       <p class="fase-stats" id="fase-stats">—</p>
-      <button id="btn-next" class="big-btn">Próxima fase ▶</button>
+      <button id="btn-next" class="big-btn">Ir para o mapa ▶</button>
     </div>
   </div>
 
@@ -87,8 +151,8 @@
   <div id="screen-gameover" class="screen hidden">
     <div class="menu-box">
       <h2>Ih, caiu! 😅</h2>
-      <p class="tagline">Mas a luta continua.<br>Bora de novo?</p>
-      <button id="btn-retry" class="big-btn">Tentar de novo ▶</button>
+      <p class="tagline">Mas a luta continua. Levanta e vamos de novo!</p>
+      <button id="btn-retry" class="big-btn">Tentar a fase de novo ▶</button>
       <button id="btn-menu" class="ghost-btn">Menu</button>
     </div>
   </div>
@@ -96,8 +160,8 @@
   <!-- TELA: Vitória -->
   <div id="screen-win" class="screen hidden">
     <div class="menu-box win-box">
-      <h1 class="logo win-logo">VITÓRIA! 🎉</h1>
-      <p class="tagline">Você completou o <b>Super Lula World</b><br>e reuniu os bons feitos do Brasil!</p>
+      <h1 class="logo win-logo">BRASIL<br>RECONSTRUÍDO! 🎉</h1>
+      <p class="tagline">Você venceu todas as forças do atraso<br>e devolveu os direitos ao povo!</p>
       <div id="win-feitos" class="win-feitos"></div>
       <p class="fase-stats" id="win-stats">—</p>
       <button id="btn-win-again" class="big-btn">Jogar de novo ▶</button>

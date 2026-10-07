@@ -1,63 +1,66 @@
 # 🇧🇷 Super Lula World
 
-Um jogo de plataforma estilo *Super Mario / Super Flavio World*, feito como **tributo**
-às realizações de políticas públicas — os **"bons feitos"**. Corra pelo Brasil, pule na
-cabeça dos *perrengues*, colete **votos** e desbloqueie as realizações ao longo de 3 fases!
+Um jogo de plataforma estilo *Super Mario*, **didático e tributo**, sobre reconstruir
+o Brasil. Enfrente as **forças do atraso**, derrote os chefões e, a cada vitória,
+devolva uma **conquista** ao povo!
 
-Feito em **HTML5 + Canvas** puro, sem dependências. É só abrir no navegador.
+Feito em **HTML5 + Canvas** puro, sem dependências. Abra no navegador e jogue.
 
 ## ▶️ Como rodar
 
 Abra o `index.html` em qualquer navegador moderno. Só isso.
 
-Se o seu navegador bloquear algo em `file://`, suba um servidor local:
-
+Para servir localmente:
 ```bash
 python3 -m http.server 8000
-# depois abra http://localhost:8000
+# abra http://localhost:8000
 ```
+
+## ✨ O que tem no jogo
+
+- **Introdução com história** (a missão de reconstruir o país)
+- **Seleção de personagem**: Lula, A Professora (pula mais alto) e O Trabalhador (corre mais)
+- **Mapa do Brasil** com as fases em sequência
+- **4 fases** temáticas, cada uma com cenário brasileiro próprio
+  (sertão, cidade, campo, capital com Cristo e Pão de Açúcar)
+- **Chefões** = forças do atraso: **A Fome, O Desmonte, A Desigualdade e a Ameaça à Democracia**
+- **Conquistas** desbloqueadas ao derrotar cada chefão (Bolsa Família, Farmácia Popular,
+  Minha Casa Minha Vida, salário mínimo acima da inflação, ProUni, Luz para Todos e mais)
+- **Música** de fundo original (botão 🔊 liga/desliga) e efeitos sonoros
+- **Perigos criativos**: poças de desinformação 💬 no lugar dos espinhos
+- **Tutorial** na primeira fase, **pausa**, controles de **teclado e touch**
 
 ## 🎮 Controles
 
 | Ação | Teclado | Touch |
 |------|---------|-------|
-| Andar | `←` `→` ou `A` `D` | botões ◀ ▶ |
-| Pular (segure p/ pular mais alto) | `Espaço`, `W`, `↑` ou `Z` | botão ⬆ |
-| Confirmar nas telas | `Enter` / clique | toque |
+| Andar | `←` `→` / `A` `D` | botões ◀ ▶ |
+| Pular (segure p/ mais alto) | `Espaço` / `W` / `↑` | botão ⬆ |
+| Pausar | `Esc` / `P` / ⏸ | botão ⏸ |
+| Confirmar | `Enter` / clique | toque |
 
-- 🗳️ Colete **votos** para pontos.
-- ⭐ Pegue as **estrelas** para desbloquear um **bom feito** (com um resumo).
-- Pule na cabeça dos **perrengues** para derrotá-los.
-- Desvie dos **espinhos** e não caia nos buracos.
-- Chegue na **bandeira** 🚩 para vencer a fase.
-
-## 🌟 Os "bons feitos" do jogo
-
-As estrelas desbloqueiam realizações de políticas públicas, com descrições curtas:
-Bolsa Família, Farmácia Popular, salário mínimo acima da inflação, Mais Médicos,
-Minha Casa Minha Vida, proteção às famílias, regulação das bets, Brasil fora do
-Mapa da Fome, ProUni e novas universidades, Luz para Todos, apoio ao fim da escala
-6x1 e soberania do Brasil.
+Pule na **cabeça** dos vilões para derrotá-los. No fim de cada fase, enfrente o
+**CHEFÃO**: pule na cabeça dele várias vezes até zerar a barra de vida. 🏆
 
 ## 🗂️ Estrutura
 
 ```
-index.html      # estrutura, telas (menu, HUD, pop-ups) e o <canvas>
-css/style.css   # visual, telas e controles touch
-js/levels.js    # mapas das fases + textos dos bons feitos
-js/game.js      # motor: física, colisão, inimigos, câmera, render e áudio
+index.html      # telas (menu, intro, personagem, mapa, missão, pausa, etc.) e o <canvas>
+css/style.css   # visual de todas as telas, HUD, barra do chefão e controles
+js/levels.js    # história, personagens, conquistas, chefões e mapas das fases
+js/game.js      # motor: cenas, física, colisão, chefões, música, render e áudio
 ```
 
-As fases são mapas de texto em `js/levels.js` — dá pra criar novas facilmente.
-Legenda: `G` chão · `B` tijolo · `=` plataforma · `?` bloco surpresa · `o` voto ·
-`S` bom feito · `E` perrengue · `^` espinho · `P` início · `F` bandeira.
+As fases são mapas de texto em `js/levels.js` (fácil de editar/criar).
+Legenda: `G` chão · `B` bloco · `=` plataforma · `?` bloco surpresa · `o` voto ·
+`w` poça de desinformação · `E` vilão · `X` chefão · `P` início.
 
 ## 📝 Nota sobre o conteúdo
 
-O jogo é um **tributo positivo**: celebra realizações e políticas públicas. Ele foi
-pensado para ser leve e divertido — não inclui ataques pessoais nem acusações contra
-pessoas reais. Os "perrengues" são obstáculos genéricos do jogo, não caricaturas de
-ninguém.
+Tributo **positivo e didático**. Os vilões são as **forças do atraso** personificadas
+(A Fome, A Desigualdade, etc.) — **não representam pessoas reais** e o jogo não contém
+ataques pessoais nem acusações contra indivíduos. A ideia é celebrar conquistas e
+direitos, de forma leve e divertida.
 
 ---
 
