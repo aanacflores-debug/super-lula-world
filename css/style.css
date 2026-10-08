@@ -294,6 +294,7 @@ h2{
 .sh-lead{font-size:clamp(12px,3vw,14.5px);margin-bottom:9px;}
 .sh-steps{text-align:left;margin:0 auto 12px;max-width:370px;padding-left:20px;
   font-size:clamp(12px,3vw,14px);line-height:1.45;display:flex;flex-direction:column;gap:6px;}
+.sh-note{font-size:clamp(10.5px,2.6vw,12.5px);color:#7a6a52;margin-bottom:11px;line-height:1.35;}
 #start-help .big-btn{width:100%;padding:11px 16px;}
 
 /* ---------------- Aviso girar o celular ---------------- */
@@ -349,16 +350,32 @@ h2{
 
 /* ====== Mapa no celular: painel maior (leitura) + título/dica fora do painel ====== */
 @media (hover:none) and (pointer:coarse){
-  .painel{width:min(42%,248px);top:6px;left:6px;padding:7px 10px;border-radius:12px;}
-  .pn-title{font-size:13px;margin-bottom:0;}
-  .pn-sub{font-size:9px;margin-bottom:4px;}
-  .pn-row{padding:3px 0;gap:6px;}
-  .pn-ico{font-size:14px;}
-  .pn-nome{font-size:11px;line-height:1.14;}
-  .pn-nome small{font-size:.74em;}
-  .pn-val{font-size:11px;max-width:42%;}
-  .map-top{left:46%;right:6px;top:8px;}
-  .map-top h2{font-size:clamp(17px,4.2vw,24px);}
+  .painel{width:min(46%,276px);top:6px;left:6px;padding:8px 11px;border-radius:13px;}
+  .pn-title{font-size:14.5px;margin-bottom:0;}
+  .pn-sub{font-size:9.5px;margin-bottom:4px;}
+  .pn-row{padding:3.5px 0;gap:7px;}
+  .pn-ico{font-size:15.5px;}
+  .pn-nome{font-size:12px;line-height:1.16;}
+  .pn-nome small{font-size:.76em;}
+  .pn-val{font-size:12px;max-width:40%;}
+  .map-top{left:50%;right:6px;top:8px;}
+  .map-top h2{font-size:clamp(16px,3.8vw,23px);}
   .map-top #map-sub{font-size:11px;}
-  .map-hint{left:auto;right:8px;transform:none;bottom:8px;font-size:11px;padding:6px 12px;max-width:52%;}
+  .map-hint{left:auto;right:8px;transform:none;bottom:8px;font-size:11px;padding:6px 12px;max-width:48%;}
+  /* barra do chefão: abaixo do HUD, e as mensagens descem quando ela aparece */
+  #boss-bar{top:44px;width:min(62%,430px);}
+  .boss-name{font-size:13px;margin-bottom:3px;}
+  .boss-hp{height:11px;}
+  body.boss-on #fact-banner{top:92px;}
+}
+
+/* ====== Tela "Baixe o app" compacta no celular (cabe sem rolar) ====== */
+@media (hover:none) and (pointer:coarse){
+  .sh-card{padding:11px 14px;}
+  .sh-ico{font-size:26px;margin-bottom:0;}
+  .sh-card h2{font-size:18px;margin-bottom:4px;}
+  .sh-lead{font-size:12px;margin-bottom:7px;}
+  .sh-steps{font-size:12px;gap:5px;margin-bottom:7px;max-width:100%;}
+  .sh-note{font-size:10.5px;margin-bottom:8px;}
+  #start-help .big-btn{padding:9px 14px;font-size:16px;}
 }

@@ -412,6 +412,7 @@ function updateBoss() {
     document.getElementById("boss-emoji").textContent = def.emoji;
     document.getElementById("boss-label").textContent = def.nome;
     document.getElementById("boss-bar").classList.remove("hidden");
+    document.body.classList.add("boss-on");   // afasta as mensagens da barra do chefão
     updateBossBar();
   }
   if (!bossActive) return;
@@ -582,6 +583,7 @@ function showScene(s) {
   document.getElementById("hud").classList.toggle("hidden", !playingHud);
   const showBoss = (s===Scene.PLAY && bossActive && boss && boss.alive);
   document.getElementById("boss-bar").classList.toggle("hidden", !showBoss);
+  document.body.classList.toggle("boss-on", showBoss);
   // controles de toque só aparecem jogando (não no menu/mapa/telas)
   document.getElementById("touch-controls").classList.toggle("hidden", !(touchEnabled && (s===Scene.PLAY || s===Scene.PAUSE)));
   if (s!==Scene.PLAY) { document.getElementById("tutorial-hint").classList.add("hidden"); document.getElementById("fact-banner").classList.add("hidden"); }
