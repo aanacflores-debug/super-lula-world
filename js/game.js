@@ -373,7 +373,8 @@ function updateEnemies() {
       e.y = e.baseY + Math.sin(e.t*0.12)*10;
     } else {
       e.vy += GRAVITY; if (e.vy>MAX_FALL) e.vy=MAX_FALL;
-      if (aggro && e.onGround) e.vx = Math.sign(player.x - e.x) * ENEMY_SPD * 1.5 || e.vx;
+      // aggro persegue o jogador — mas só vira para esse lado se houver chão (não corre pro buraco)
+      if (aggro && e.onGround) { const d=Math.sign(player.x - e.x); if (d!==0 && groundAhead(e, d)) e.vx = d * ENEMY_SPD * 1.5; }
       enemyMove(e, aggro ? ENEMY_SPD*1.5 : ENEMY_SPD);
     }
     if (player.invuln===0 && deathTimer===0 && aabb(player, e)) {
@@ -385,7 +386,20 @@ function updateEnemies() {
     }
   });
 }
+/* há chão logo à frente (na direção dir) e nenhuma parede? — usado para
+   patrulhar nos blocos sem cair no buraco nem atravessar paredes */
+function groundAhead(e, dir) {
+  const aheadX = dir>0 ? e.x+e.w+2 : e.x-2;
+  const aheadC = Math.floor(aheadX/TS);
+  const footR  = Math.floor((e.y+e.h+4)/TS);
+  if (!isSolidCell(aheadC, footR)) return false;                       // buraco/beirada
+  const r0=Math.floor(e.y/TS), r1=Math.floor((e.y+e.h-1)/TS);
+  for (let r=r0;r<=r1;r++) if (isSolidCell(aheadC,r)) return false;    // parede
+  return true;
+}
 function enemyMove(e, spd) {
+  // beirada: se está no chão e não há chão à frente, vira (vai e volta no bloco)
+  if (e.onGround && e.vx!==0 && !groundAhead(e, e.vx>0?1:-1)) e.vx = -e.vx;
   e.x += e.vx;
   let left=Math.floor(e.x/TS), right=Math.floor((e.x+e.w)/TS);
   let top=Math.floor(e.y/TS), bottom=Math.floor((e.y+e.h-1)/TS);
@@ -395,12 +409,6 @@ function enemyMove(e, spd) {
   left=Math.floor(e.x/TS); right=Math.floor((e.x+e.w-1)/TS); bottom=Math.floor((e.y+e.h)/TS);
   e.onGround=false;
   if (e.vy>0){ for(let c=left;c<=right;c++) if(isSolidCell(c,bottom)){e.y=bottom*TS-e.h-0.01;e.vy=0;e.onGround=true;break;} }
-  if (e.onGround){
-    const dir=e.vx>0?1:-1;
-    const aheadC=Math.floor((e.x+e.w/2+dir*(e.w/2+5))/TS);
-    const belowR=Math.floor((e.y+e.h+6)/TS);
-    if (!isSolidCell(aheadC,belowR)) e.vx=-e.vx;
-  }
 }
 
 function updateBoss() {
