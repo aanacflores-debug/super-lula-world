@@ -219,24 +219,23 @@ h2{
 
 /* ---------------- Painel do Brasil (no mapa) ---------------- */
 .painel{
-  position:absolute;top:10px;left:10px;z-index:3;pointer-events:none;
-  width:min(40%,266px);
-  background:rgba(21,22,26,.82);border:2px solid rgba(255,255,255,.25);
-  border-radius:14px;padding:9px 10px;backdrop-filter:blur(3px);
+  position:absolute;top:12px;left:12px;z-index:3;pointer-events:none;
+  width:min(42%,380px);
+  background:rgba(21,22,26,.84);border:2px solid rgba(255,255,255,.25);
+  border-radius:16px;padding:13px 15px;backdrop-filter:blur(3px);
   box-shadow:0 6px 20px rgba(0,0,0,.4);
 }
 .pn-title{font-family:'Baloo 2',sans-serif;font-weight:800;color:#fff;
-  font-size:clamp(11px,2.3vw,15px);margin-bottom:1px;letter-spacing:.3px;}
-.pn-sub{color:#aab0bd;font-size:clamp(8.5px,1.7vw,10.5px);margin-bottom:6px;line-height:1.15;}
-.pn-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid rgba(255,255,255,.12);}
-.pn-ico{font-size:clamp(13px,2.6vw,17px);flex:0 0 auto;}
-.pn-nome{flex:1;color:#e9e9ef;font-size:clamp(10px,2.1vw,12.5px);line-height:1.15;}
-.pn-nome small{display:block;color:#9aa0ad;font-size:.82em;}
-.pn-val{flex:0 0 auto;max-width:48%;text-align:right;color:#cfd3db;font-size:clamp(10px,2.1vw,12.5px);font-weight:600;line-height:1.15;}
+  font-size:clamp(15px,2.6vw,20px);margin-bottom:1px;letter-spacing:.3px;}
+.pn-sub{color:#aab0bd;font-size:clamp(10px,1.9vw,13px);margin-bottom:8px;line-height:1.2;}
+.pn-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid rgba(255,255,255,.14);}
+.pn-ico{font-size:clamp(17px,3vw,23px);flex:0 0 auto;}
+.pn-nome{flex:1;color:#e9e9ef;font-size:clamp(12.5px,2.3vw,16.5px);line-height:1.18;}
+.pn-nome small{display:block;color:#9aa0ad;font-size:.8em;}
+.pn-val{flex:0 0 auto;max-width:44%;text-align:right;color:#cfd3db;font-size:clamp(12.5px,2.3vw,16.5px);font-weight:700;line-height:1.18;}
 .pn-antes{color:#e88;}
 .pn-depois{color:#49d67e;}
 .pn-ok .pn-val{color:#49d67e;}
-@media (max-width:560px){ .painel{width:44%;top:6px;left:6px;padding:7px 8px;} }
 
 /* ---------------- Missão ---------------- */
 .missao-badge{
@@ -351,15 +350,15 @@ h2{
 
 /* ====== Mapa no celular: painel maior (leitura) + título/dica fora do painel ====== */
 @media (hover:none) and (pointer:coarse){
-  .painel{width:min(46%,276px);top:6px;left:6px;padding:8px 11px;border-radius:13px;}
-  .pn-title{font-size:14.5px;margin-bottom:0;}
-  .pn-sub{font-size:9.5px;margin-bottom:4px;}
-  .pn-row{padding:3.5px 0;gap:7px;}
-  .pn-ico{font-size:15.5px;}
-  .pn-nome{font-size:12px;line-height:1.16;}
-  .pn-nome small{font-size:.76em;}
-  .pn-val{font-size:12px;max-width:40%;}
-  .map-top{left:50%;right:6px;top:8px;}
+  .painel{width:min(50%,322px);top:6px;left:6px;padding:9px 12px;border-radius:14px;}
+  .pn-title{font-size:16px;margin-bottom:0;}
+  .pn-sub{font-size:10.5px;margin-bottom:5px;}
+  .pn-row{padding:4.5px 0;gap:8px;}
+  .pn-ico{font-size:18px;}
+  .pn-nome{font-size:13.5px;line-height:1.18;}
+  .pn-nome small{font-size:.78em;}
+  .pn-val{font-size:13.5px;max-width:40%;}
+  .map-top{left:53%;right:6px;top:8px;}
   .map-top h2{font-size:clamp(16px,3.8vw,23px);}
   .map-top #map-sub{font-size:11px;}
   .map-hint{left:auto;right:8px;transform:none;bottom:8px;font-size:11px;padding:6px 12px;max-width:48%;}
