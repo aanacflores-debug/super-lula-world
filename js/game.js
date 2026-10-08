@@ -105,7 +105,7 @@ document.querySelectorAll(".tbtn").forEach((btn) => {
   btn.addEventListener("pointerleave", r);
 });
 const touchEnabled = window.matchMedia("(hover:none) and (pointer:coarse)").matches;
-const WORLD_ZOOM = touchEnabled ? 1.3 : 1;   // no celular, aproxima a câmera (Lula maior)
+const WORLD_ZOOM = touchEnabled ? 1.5 : 1;   // no celular, aproxima a câmera (Lula maior)
 
 /* ----------------------------- Áudio / Música --------------------------- */
 let actx = null, musicOn = true, musicTimer = null, musicStep = 0;

@@ -111,10 +111,11 @@ body{
 @media (hover:none) and (pointer:coarse){
   #hud{padding:5px 8px;gap:5px;}
   .hud-item{padding:3px 8px;font-size:clamp(11px,2vw,15px);}
-  #fact-banner{top:54px;max-width:74%;padding:6px 11px;font-size:11.5px;line-height:1.26;border-radius:11px;}
+  #fact-banner{top:54px;max-width:82%;padding:8px 13px;font-size:14px;line-height:1.3;border-radius:12px;}
   #fact-banner .fb-tag{font-size:.72em;margin-bottom:2px;}
   #fact-banner .fb-close{display:block;margin-top:4px;font-size:.78em;color:#aab0bd;font-weight:600;}
-  #tutorial-hint{bottom:8px;top:auto;font-size:11px;padding:5px 12px;max-width:56%;}
+  #tutorial-hint{bottom:8px;top:auto;font-size:13px;padding:6px 14px;max-width:62%;}
+  #hud .hud-item{font-size:clamp(13px,2.4vw,17px);}
 }
 
 /* ---------------- Telas genéricas ---------------- */
@@ -182,7 +183,7 @@ h2{
   display:flex;align-items:center;justify-content:center;font-size:clamp(46px,12vw,76px);
   border:3px solid var(--preto);
 }
-.intro-texto{font-size:clamp(14px,3vw,17px);color:#333;line-height:1.55;margin-bottom:16px;}
+.intro-texto{font-size:clamp(15.5px,3.3vw,18.5px);color:#333;line-height:1.55;margin-bottom:16px;}
 .intro-dots{display:flex;gap:7px;justify-content:center;margin-bottom:16px;}
 .intro-dots span{width:9px;height:9px;border-radius:50%;background:#ccc;}
 .intro-dots span.on{background:var(--vermelho);}
@@ -260,14 +261,14 @@ h2{
   padding:4px 12px;border-radius:999px;border:2px solid var(--preto);margin-bottom:10px;
 }
 .feito-nome{color:var(--azul);margin-bottom:8px;}
-.feito-texto{font-size:clamp(14px,3vw,17px);color:#333;line-height:1.5;margin-bottom:12px;}
+.feito-texto{font-size:clamp(15.5px,3.3vw,18.5px);color:#333;line-height:1.5;margin-bottom:12px;}
 .feito-sabia{
   font-size:clamp(12px,2.7vw,15px);color:#5a4a00;line-height:1.45;
   background:#fff3c4;border:2px dashed #e0b500;border-radius:12px;
   padding:9px 12px;margin-bottom:18px;
 }
 .feito-sabia:empty{display:none;}
-.fase-stats{font-size:clamp(14px,3vw,18px);color:#333;margin-bottom:18px;line-height:1.6;}
+.fase-stats{font-size:clamp(15.5px,3.3vw,19px);color:#333;margin-bottom:18px;line-height:1.6;}
 .fc-sec{text-align:left;background:#fff;border:2px solid var(--preto);border-radius:12px;padding:8px 12px;margin:8px 0;font-size:clamp(13px,2.8vw,16px);line-height:1.5;}
 .fc-h{display:block;font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--vermelho);font-size:.95em;margin-bottom:3px;}
 .fc-votos{font-size:clamp(13px,2.8vw,16px);color:#444;margin-top:6px;}
@@ -316,16 +317,16 @@ h2{
 .touch-left{position:absolute;left:12px;bottom:14px;display:flex;gap:10px;}
 .touch-right{position:absolute;right:12px;bottom:14px;}
 .tbtn{
-  pointer-events:auto;width:clamp(52px,12vw,74px);height:clamp(52px,12vw,74px);
-  border-radius:50%;border:3px solid rgba(0,0,0,.4);background:rgba(255,255,255,.28);
-  color:#15161a;font-size:clamp(22px,6vw,30px);font-weight:800;
+  pointer-events:auto;width:clamp(44px,10vw,62px);height:clamp(44px,10vw,62px);
+  border-radius:50%;border:3px solid rgba(0,0,0,.35);background:rgba(255,255,255,.22);
+  color:#15161a;font-size:clamp(20px,5vw,26px);font-weight:800;
   display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none;
 }
-.tbtn:active{background:rgba(255,209,46,.7);}
-.tbtn-jump{width:clamp(66px,15vw,94px);height:clamp(66px,15vw,94px);
-  background:rgba(225,16,33,.28);border-color:rgba(255,255,255,.4);color:#fff;}
-.tbtn-jump:active{background:rgba(225,16,33,.5);}
+.tbtn:active{background:rgba(255,209,46,.6);}
+.tbtn-jump{width:clamp(56px,12vw,78px);height:clamp(56px,12vw,78px);
+  background:rgba(225,16,33,.22);border-color:rgba(255,255,255,.35);color:#fff;}
+.tbtn-jump:active{background:rgba(225,16,33,.45);}
 
 /* ====== Compactação p/ celular — colocado NO FIM para vencer em especificidade ====== */
 @media (hover:none) and (pointer:coarse){
